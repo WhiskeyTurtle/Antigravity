@@ -344,8 +344,8 @@
             <thead>
                 <tr>
                     <th>TOKEN</th>
-                    <th>ENTRY</th>
-                    <th>CURRENT</th>
+                    <th>ENTRY MCAP</th>
+                    <th>CURRENT MCAP</th>
                     <th>PNL (SOL)</th>
                     <th>PNL (%)</th>
                     <th>TIME</th>
@@ -408,9 +408,9 @@
             }
         }
 
-        async function addWallet() {
-            const addr = document.getElementById('new-wallet-addr').value.trim();
-            const name = document.getElementById('new-wallet-name').value.trim();
+        async function addKOL() {
+            const addr = document.getElementById('kol-wallet').value.trim();
+            const name = document.getElementById('kol-label').value.trim();
 
             if (!addr || !name) return alert("Address and Name required");
 
@@ -423,8 +423,8 @@
                 const data = await res.json();
                 if (data.status === 'ok') {
                     log(`Added wallet: ${name}`);
-                    document.getElementById('new-wallet-addr').value = '';
-                    document.getElementById('new-wallet-name').value = '';
+                    document.getElementById('kol-wallet').value = '';
+                    document.getElementById('kol-label').value = '';
                     fetchWallets();
                 } else {
                     alert("Error: " + JSON.stringify(data));
@@ -470,6 +470,13 @@
             }
         };
 
+        function formatMCap(val) {
+            if (!val || val === 0) return "$0";
+            if (val >= 1000000) return "$" + (val / 1000000).toFixed(1) + "M";
+            if (val >= 1000) return "$" + (val / 1000).toFixed(1) + "k";
+            return "$" + val.toFixed(0);
+        }
+
         function updatePositions(positions) {
             const tbody = document.getElementById('trades-body');
 
@@ -487,13 +494,23 @@
                 const pnlClass = pos.pnl_sol >= 0 ? 'pnl-positive' : 'pnl-negative';
                 const pnlSign = pos.pnl_sol >= 0 ? '+' : '';
 
+                // Format Time
+                const startTime = new Date(pos.start_time * 1000).toLocaleTimeString();
+
+                // Axiom Link - Use pair_address if available, fallback to token search
+                const axiomLink = pos.pair_address ?
+                    `https://axiom.trade/meme/${pos.pair_address}?chain=sol` :
+                    `https://axiom.trade/discover?q=${pos.token}`;
+
                 row.innerHTML = `
-                    <td>${pos.token}</td>
-                    <td>${pos.entry_price.toFixed(9)}</td>
-                    <td>${pos.current_price.toFixed(9)}</td>
+                    <td>
+                        <a href="${axiomLink}" target="_blank" style="color:var(--accent); text-decoration:none;" title="View on Axiom (Pair: ${pos.pair_address || 'N/A'})">${pos.token.substring(0, 8)}...</a>
+                    </td>
+                    <td>${formatMCap(pos.entry_fdv)}</td>
+                    <td>${formatMCap(pos.current_fdv)}</td>
                     <td class="${pnlClass}">${pnlSign}${pos.pnl_sol.toFixed(4)}</td>
                     <td class="${pnlClass}">${pnlSign}${pos.pnl_pct.toFixed(2)}%</td>
-                    <td>${pos.duration_min}m</td>
+                    <td title="Held for ${pos.duration_min}m">${startTime}</td>
                     <td><span class="status-badge status-${pos.status}">${pos.status.replace('_', ' ')}</span></td>
                 `;
 

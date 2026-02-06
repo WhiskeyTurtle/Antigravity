@@ -53,6 +53,7 @@ class RealyEngine:
                         liquidity_usd = float(liquidity.get("usd", 0))
                         
                         fdv = float(best_pair.get("fdv", 0))
+                        pair_id = best_pair.get("pairAddress", "")
                         
                         return {
                             "price_sol": price_native,
@@ -62,6 +63,7 @@ class RealyEngine:
                             "price_change_m5": price_change_m5,
                             "liquidity_usd": liquidity_usd,
                             "fdv": fdv,
+                            "pair_address": pair_id,
                             "liquidity_check": True,
                             "source": "DEXSCREENER"
                         }

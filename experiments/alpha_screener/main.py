@@ -215,8 +215,13 @@ async def process_feed():
 
         # Check Paper Positions every 10s
         if current_time - last_pnl_check > 10:
-            if await paper_trader.update_positions():
-                await service.broadcast({"type": "log", "msg": "💰 PNL Updated (Trade Closed)"})
+            closed_trades = await paper_trader.update_positions()
+            for trade in closed_trades:
+                pnl_sign = "+" if trade['pnl'] >= 0 else ""
+                await service.broadcast({
+                    "type": "snipe",
+                    "msg": f"💰 PAPER SELL ({trade['reason']}): {trade['token'][:8]}... PNL: {pnl_sign}{trade['pnl']:.4f} SOL (MCap: ${trade['sell_fdv']:,.0f})"
+                })
             last_pnl_check = current_time
 
         try:
@@ -324,41 +329,27 @@ async def process_feed():
                 
                 if analysis["verdict"] == "BUY":
                     # Auto-Snipe Signal
+                    token_id = str(token_mint)
+                    price_sol = market_data.get("price_sol", 0) or 0.0001
+                    fdv = market_data.get("fdv", 0)
+                    pair_addr = market_data.get("pair_address", "")
+                    
                     try:
-                        token_id = str(token_mint)
-                        # We use the price from market_data if available
-                        price_sol = market_data.get("price_sol", 0) or 0.0001
-                        
-                        await paper_trader.open_position(signature, token_id, price_sol, 1000)
-                    except Exception as e:
-                        print(f"Sniper Error: {e}")
-                        
-                        # Check Price (Real)
-                        quote = await paper_trader.engine.get_token_price(token_id)
-                        entry_price = quote["price_sol"]
-                        print(f"💰 Price Check for {token_id}: {entry_price} SOL")
-                        
-                        # Execute Snipe (Simulated)
+                        # 1. Execute Snipe (Simulated/Simultaneous)
                         try:
-                            snipe_res = await sniper.execute_swap(token_id) 
+                            await sniper.execute_swap(token_id) 
                         except Exception as e:
                             print(f"⚠️ Sniper Net Error (Ignored for Paper Trade): {e}")
-                            snipe_res = {"status": "failed_network"}
 
-                        if entry_price > 0:
-                            # Calculate estimated tokens assuming 0.01 SOL trade
-                            estimated_tokens = 0.01 / entry_price
-                            await paper_trader.open_position(token_id, token_id, entry_price, estimated_tokens)
-
-                            await service.broadcast({
-                                "type": "snipe",
-                                "msg": f"🔫 PAPER BUY: {token_id[:8]}... @ {entry_price:.6f} SOL"
-                            })
-                        else:
-                             print("⚠️ Skipping Paper Trade: No Price Data")
-                             
+                        # 2. Open Paper Position
+                        await paper_trader.open_position(signature, token_id, price_sol, 1000, fdv, pair_addr)
+                        
+                        await service.broadcast({
+                            "type": "snipe",
+                            "msg": f"🔫 PAPER BUY: {token_id[:8]}... @ {price_sol:.6f} SOL (MCap: ${fdv:,.0f})"
+                        })
                     except Exception as e:
-                        print(f"⚠️ Sniper Failed: {e}")
+                        print(f"⚠️ Trade Execution Failed: {e}")
             else:
                 await service.broadcast({
                     "type": "update",
