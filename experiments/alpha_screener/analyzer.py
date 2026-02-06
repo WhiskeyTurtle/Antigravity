@@ -65,3 +65,29 @@ class Analyzer:
             },
             "risk_msg": " ".join(analysis_note) if analysis_note else "Waiting for volume..."
         }
+
+    def score_social(self, social_data):
+        """
+        Scoring Logic (Social Conviction):
+        - Impact Score: Influencer weight (0-100)
+        - Multiplier: High Impact = Buy Signal regardless of tech
+        """
+        impact = social_data.get("impact_score", 0)
+        author = social_data.get("author", "Unknown")
+        
+        score = impact # Direct mapping for now
+        verdict = "WATCH"
+        
+        if impact >= 90:
+            score += 200 # Massive boost
+            verdict = "SUPER_ALPHA"
+        elif impact >= 50:
+            score += 50
+            verdict = "BUY"
+            
+        return {
+            "token": social_data.get("token"),
+            "score": score,
+            "verdict": verdict,
+            "risk_msg": f"🐦 Social Alpha: {author} (Impact: {impact})"
+        }

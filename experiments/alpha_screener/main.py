@@ -21,6 +21,7 @@ from analyzer import Analyzer
 from sniper import Sniper
 from paper_trader import PaperTrader
 from kol_monitor import KOLMonitor
+from social_monitor import SocialMonitor
 
 # Global State
 class FeedService:
@@ -99,7 +100,7 @@ async def lifespan(app: FastAPI):
     sniper = Sniper(async_client)
     paper_trader = PaperTrader()
     
-    # Callback for KOL Monitor to feed the main pipeline
+    # MONITOR CALLBACKS
     async def on_kol_activity(signature, wallet_address, wallet_name, source_type):
         import time # Import time locally if not already global
         await service.queue.put({
@@ -110,11 +111,22 @@ async def lifespan(app: FastAPI):
             "kol_label": wallet_name,
             "time": time.time()
         })
+
+    async def on_social_signal(event):
+        """Handles events from SocialMonitor (Twitter/Telegram)"""
+        await service.queue.put({
+            "type": "SOCIAL_SIGNAL",
+            "data": event # Pass the whole dict
+        })
         
     # Start KOL Monitor
     kol_monitor = KOLMonitor(service.rpc_url, "wss://mainnet.helius-rpc.com/?api-key=a16f485e-cca9-47be-a815-f8936034edff", KOL_WALLETS, on_kol_activity)
     service.running = True
     asyncio.create_task(kol_monitor.start())
+
+    # Start Social Monitor
+    social_monitor = SocialMonitor(on_social_signal)
+    asyncio.create_task(social_monitor.start())
     
     # NOTE: Disabled generic "All New Tokens" listener to focus on KOLs as requested
     # listener = Listener(service.queue)
@@ -191,6 +203,14 @@ async def process_feed():
                 "type": "pnl_update",
                 "data": stats
             })
+            
+            # Broadcast Active Positions
+            positions = paper_trader.get_positions()
+            await service.broadcast({
+                "type": "positions_update",
+                "data": positions
+            })
+            
             last_heartbeat = current_time
 
         # Check Paper Positions every 10s

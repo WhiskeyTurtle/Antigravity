@@ -244,6 +244,68 @@
             font-family: var(--font);
             font-size: 0.8rem;
         }
+
+        /* Trades Panel */
+        #trades-panel {
+            background: var(--panel);
+            border: 1px solid var(--accent);
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        #trades-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.75rem;
+        }
+
+        #trades-table th {
+            text-align: left;
+            padding: 8px 4px;
+            border-bottom: 1px solid var(--accent);
+            color: var(--accent);
+            font-weight: normal;
+        }
+
+        #trades-table td {
+            padding: 6px 4px;
+            border-bottom: 1px solid #222;
+        }
+
+        .pnl-positive {
+            color: var(--accent);
+        }
+
+        .pnl-negative {
+            color: var(--danger);
+        }
+
+        .status-badge {
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+        }
+
+        .status-ACTIVE {
+            background: #333;
+            color: #aaa;
+        }
+
+        .status-NEAR_TP {
+            background: var(--accent);
+            color: #000;
+        }
+
+        .status-NEAR_SL {
+            background: var(--danger);
+            color: #fff;
+        }
+
+        .status-NEAR_TIME {
+            background: #ff9500;
+            color: #000;
+        }
     </style>
 </head>
 
@@ -264,14 +326,38 @@
         </div>
     </header>
 
+    <!-- KOL Manager Panel -->
     <div id="kol-panel">
-        <h3 style="margin-top:0; color:var(--accent)">Tracked Wallets</h3>
-        <div id="kol-list">Loading...</div>
+        <h3 style="margin-top:0; color:var(--accent); font-size:1rem;">KOL MANAGER</h3>
+        <div id="kol-list"></div>
         <div class="kol-form">
-            <input type="text" id="new-wallet-addr" placeholder="Wallet Address" style="flex:2">
-            <input type="text" id="new-wallet-name" placeholder="Label (e.g. 'Whale 1')" style="flex:1">
-            <button onclick="addWallet()">+ Track</button>
+            <input type="text" id="kol-wallet" placeholder="Wallet Address" style="flex:1">
+            <input type="text" id="kol-label" placeholder="Label (e.g. Ansem)" style="width:150px">
+            <button onclick="addKOL()">Add</button>
         </div>
+    </div>
+
+    <!-- Live Trades Panel -->
+    <div id="trades-panel">
+        <h3 style="margin-top:0; color:var(--accent); font-size:1rem; margin-bottom:10px;">📊 ACTIVE POSITIONS</h3>
+        <table id="trades-table">
+            <thead>
+                <tr>
+                    <th>TOKEN</th>
+                    <th>ENTRY</th>
+                    <th>CURRENT</th>
+                    <th>PNL (SOL)</th>
+                    <th>PNL (%)</th>
+                    <th>TIME</th>
+                    <th>STATUS</th>
+                </tr>
+            </thead>
+            <tbody id="trades-body">
+                <tr>
+                    <td colspan="7" style="text-align:center; color:var(--dim); padding:20px;">No active positions</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 
     <div id="feed">
@@ -379,8 +465,41 @@
                 updateFeedItem(data);
             } else if (data.type === 'pnl_update') {
                 updatePNL(data.data);
+            } else if (data.type === 'positions_update') {
+                updatePositions(data.data);
             }
         };
+
+        function updatePositions(positions) {
+            const tbody = document.getElementById('trades-body');
+
+            if (!positions || positions.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--dim); padding:20px;">No active positions</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = '';
+
+            positions.forEach(pos => {
+                const row = document.createElement('tr');
+
+                // PNL color
+                const pnlClass = pos.pnl_sol >= 0 ? 'pnl-positive' : 'pnl-negative';
+                const pnlSign = pos.pnl_sol >= 0 ? '+' : '';
+
+                row.innerHTML = `
+                    <td>${pos.token}</td>
+                    <td>${pos.entry_price.toFixed(9)}</td>
+                    <td>${pos.current_price.toFixed(9)}</td>
+                    <td class="${pnlClass}">${pnlSign}${pos.pnl_sol.toFixed(4)}</td>
+                    <td class="${pnlClass}">${pnlSign}${pos.pnl_pct.toFixed(2)}%</td>
+                    <td>${pos.duration_min}m</td>
+                    <td><span class="status-badge status-${pos.status}">${pos.status.replace('_', ' ')}</span></td>
+                `;
+
+                tbody.appendChild(row);
+            });
+        }
 
         function updatePNL(stats) {
             const pnlEl = document.getElementById('pnl-val');
@@ -425,7 +544,15 @@
             } else {
                 // KOL / Source Logic
                 let sourceHTML = '';
-                if (data.kol_label && data.kol_wallet) {
+                if (data.status === 'SUPER_ALPHA' && data.social_data) {
+                    sourceHTML = `
+                        <span class="badge" style="background:#FFD700; color:#000">🐦 ${data.social_data.author_name}</span>
+                        <span class="badge" style="background:#5865F2; color:#fff">IMPACT: ${data.social_data.impact_score}</span>
+                    `;
+                    div.style.border = "2px solid #FFD700";
+                    div.style.background = "rgba(255, 215, 0, 0.1)";
+                }
+                else if (data.kol_label && data.kol_wallet) {
                     sourceHTML = `
                         <span class="badge" style="background:#b300ff; color:#fff">Found by: ${data.kol_label}</span>
                         <span class="token" title="${data.kol_wallet}" onclick="copyToClipboard('${data.kol_wallet}')" style="color:#aaa; font-size:0.8rem; margin-right:10px;">
@@ -456,8 +583,21 @@
         function updateFeedItem(data) {
             const el = document.getElementById(data.signature);
             if (el) {
-                const badgeClass = data.status === 'BUY_SIGNAL' ? 'safe' : (data.status === 'SAFE' ? 'safe' : 'risk');
-                const displayStatus = data.status === 'BUY_SIGNAL' ? '🎯 BUY' : data.status;
+                let badgeClass = 'risk';
+                let displayStatus = data.status;
+
+                if (data.status === 'BUY_SIGNAL') {
+                    badgeClass = 'safe';
+                    displayStatus = '🎯 BUY';
+                } else if (data.status === 'SAFE') {
+                    badgeClass = 'safe';
+                } else if (data.status === 'SUPER_ALPHA') {
+                    badgeClass = 'safe';
+                    displayStatus = '🚀 SUPER ALPHA';
+                    el.style.border = "2px solid #FFD700";
+                    el.style.background = "rgba(255, 215, 0, 0.1)";
+                }
+
                 el.className = `entry ${badgeClass}`;
 
                 // Remove old "ANALYZING..." badge
@@ -467,7 +607,7 @@
                 }
 
                 // Add status badge and additional info
-                const statusHTML = `<span class="badge ${badgeClass}">${displayStatus}</span>`;
+                const statusHTML = `<span class="badge ${badgeClass}" style="${data.status === 'SUPER_ALPHA' ? 'background:#FFD700; color:#000' : ''}">${displayStatus}</span>`;
                 const scoreHTML = data.score !== undefined ? ` <span style="margin-left:10px; color:#aaa">Score: ${data.score.toFixed(1)}</span>` : '';
                 const msgHTML = data.risk_msg ? ` <span style="margin-left:10px; color:#888">${data.risk_msg}</span>` : '';
 

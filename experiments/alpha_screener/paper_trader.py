@@ -80,3 +80,42 @@ class PaperTrader:
             "active_positions": len(self.positions),
             "closed_trades": len(self.closed_positions)
         }
+
+    def get_positions(self):
+        """Returns detailed active position data for dashboard"""
+        positions_list = []
+        current_time = time.time()
+        
+        for sig, pos in self.positions.items():
+            # Calculate current PnL
+            current_price = pos.get("last_price", pos["entry_price"])
+            pnl_sol = (current_price - pos["entry_price"]) * pos["amount"]
+            pnl_pct = ((current_price - pos["entry_price"]) / pos["entry_price"]) * 100
+            
+            # Calculate time held
+            duration_sec = current_time - pos["start_time"]
+            duration_min = int(duration_sec / 60)
+            
+            # Determine status
+            if pnl_pct >= self.take_profit_pct * 100:
+                status = "NEAR_TP"
+            elif pnl_pct <= self.stop_loss_pct * 100:
+                status = "NEAR_SL"
+            elif duration_sec >= self.time_stop_sec * 0.8:
+                status = "NEAR_TIME"
+            else:
+                status = "ACTIVE"
+            
+            positions_list.append({
+                "signature": sig[:8] + "...",
+                "token": pos["token_mint"][:8] + "...",
+                "entry_price": pos["entry_price"],
+                "current_price": current_price,
+                "amount": pos["amount"],
+                "pnl_sol": pnl_sol,
+                "pnl_pct": pnl_pct,
+                "duration_min": duration_min,
+                "status": status
+            })
+        
+        return positions_list
