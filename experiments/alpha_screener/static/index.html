@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ANTIGRAVITY // SOLANA ALPHA FEED</title>
+    <style>
+        :root {
+            --bg: #050505;
+            --panel: #111;
+            --accent: #00ff9d;
+            --danger: #ff0055;
+            --text: #eee;
+            --dim: #555;
+            --font: 'Courier New', monospace;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: var(--font);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        header {
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            margin: 0;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-size: 1.5rem;
+        }
+
+        .status {
+            font-size: 0.8rem;
+            color: var(--accent);
+            animation: blink 1s infinite;
+        }
+
+        #feed {
+            flex: 1;
+            overflow-y: auto;
+            border: 1px solid var(--dim);
+            padding: 10px;
+            background: var(--panel);
+            display: flex;
+            flex-direction: column-reverse;
+            /* Newest at bottom like terminal */
+        }
+
+        .entry {
+            margin-bottom: 8px;
+            padding: 8px;
+            border-left: 3px solid var(--dim);
+            background: rgba(255, 255, 255, 0.05);
+            font-size: 0.9rem;
+        }
+
+        .entry.safe {
+            border-left-color: var(--accent);
+        }
+
+        .entry.risk {
+            border-left-color: var(--danger);
+        }
+
+        .entry.snipe {
+            border: 1px solid var(--accent);
+            background: rgba(0, 255, 157, 0.1);
+        }
+
+        .timestamp {
+            color: var(--dim);
+            margin-right: 10px;
+        }
+
+        .token {
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .badge {
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            margin-left: 10px;
+        }
+
+        .badge.safe {
+            background: var(--accent);
+            color: #000;
+        }
+
+        .badge.risk {
+            background: var(--danger);
+            color: #fff;
+        }
+
+        #logs {
+            height: 150px;
+            margin-top: 20px;
+            border-top: 1px solid var(--dim);
+            padding-top: 10px;
+            font-size: 0.8rem;
+            color: var(--dim);
+            overflow-y: auto;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--dim);
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Antigravity // Alpha Feed</h1>
+        <div style="display:flex; gap:20px; align-items:center">
+            <div id="pnl-board" style="font-size:0.9rem; color:#888;">
+                PNL: <span id="pnl-val" style="color:#fff">0.00 SOL</span>
+                (<span id="open-pos">0</span> Active)
+            </div>
+            <div class="status">● LIVE CONNECTED</div>
+        </div>
+    </header>
+
+    <div id="feed">
+        <!-- Feed Items Go Here -->
+    </div>
+
+    <div id="logs">
+        <div>> System Initialized...</div>
+        <div>> Listening for Raydium V4 Pools...</div>
+    </div>
+
+    <script>
+        const feed = document.getElementById('feed');
+        const logs = document.getElementById('logs');
+        const socket = new WebSocket(`ws://${location.host}/ws`);
+
+        socket.onmessage = function (event) {
+            const data = JSON.parse(event.data);
+
+            if (data.type === 'log') {
+                log(data.msg);
+            } else if (data.type === 'snipe') {
+                addFeedItem(data, 'snipe');
+            } else if (data.type === 'new_token') {
+                // Pending item
+                addFeedItem(data, 'pending');
+            } else if (data.type === 'update') {
+                updateFeedItem(data);
+            } else if (data.type === 'pnl_update') {
+                updatePNL(data.data);
+            }
+        };
+
+        function updatePNL(stats) {
+            const pnlEl = document.getElementById('pnl-val');
+            const posEl = document.getElementById('open-pos');
+
+            pnlEl.innerText = stats.total_pnl.toFixed(4) + " SOL";
+            pnlEl.style.color = stats.total_pnl >= 0 ? '#00ff9d' : '#ff0055';
+
+            posEl.innerText = stats.active_positions;
+        }
+
+        function log(msg) {
+            const div = document.createElement('div');
+            div.textContent = `> ${msg}`;
+            logs.insertBefore(div, logs.firstChild);
+        }
+
+        function addFeedItem(data, type) {
+            const div = document.createElement('div');
+            div.className = `entry ${type}`;
+            div.id = data.signature || 'snipe-' + Date.now();
+
+            const time = data.time || new Date().toLocaleTimeString();
+
+            // Display token mint (truncated)
+            const displayToken = data.token ? `${data.token.substring(0, 8)}...${data.token.substring(data.token.length - 4)}` : '???';
+
+            if (type === 'snipe') {
+                div.innerHTML = `<span class="timestamp">[${time}]</span> ${data.msg}`;
+            } else {
+                div.innerHTML = `
+                    <span class="timestamp">[${time}]</span>
+                    <span class="badge" style="background:#555; color:#fff">${data.source || 'UNK'}</span>
+                    <span class="token">${displayToken}</span>
+                    ${type === 'pending' ? '<span class="badge">ANALYZING...</span>' : ''}
+                `;
+            }
+            feed.appendChild(div);
+            feed.scrollTop = feed.scrollHeight;
+        }
+
+        function updateFeedItem(data) {
+            const el = document.getElementById(data.signature);
+            if (el) {
+                const badgeClass = data.status === 'BUY_SIGNAL' ? 'safe' : (data.status === 'SAFE' ? 'safe' : 'risk');
+                const displayStatus = data.status === 'BUY_SIGNAL' ? '🎯 BUY' : data.status;
+                el.className = `entry ${badgeClass}`;
+
+                // Remove old "ANALYZING..." badge
+                const analyzingBadge = el.querySelector('.badge:last-of-type');
+                if (analyzingBadge && analyzingBadge.textContent.includes('ANALYZING')) {
+                    analyzingBadge.remove();
+                }
+
+                // Add status badge and additional info
+                const statusHTML = `<span class="badge ${badgeClass}">${displayStatus}</span>`;
+                const scoreHTML = data.score !== undefined ? ` <span style="margin-left:10px; color:#aaa">Score: ${data.score.toFixed(1)}</span>` : '';
+                const msgHTML = data.risk_msg ? ` <span style="margin-left:10px; color:#888">${data.risk_msg}</span>` : '';
+
+                el.innerHTML += statusHTML + scoreHTML + msgHTML;
+            }
+        }
+    </script>
+</body>
+
+</html>
