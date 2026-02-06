@@ -7,22 +7,61 @@ class Analyzer:
 
     def score_token(self, token_data):
         """
-        Scoring Logic (Simple Linear Model for MVE):
-        - Activity Score: map volume/txs to 0-100
-        - Safety Score: Random for MVE (would be rugcheck.xyz API)
+        Scoring Logic (Growth & Popularity):
+        - Volume Score (0-50): Based on 5m volume (Target $10k+)
+        - Trend Score (0-30): Based on 5m price change (Target +10%+)
+        - Liquidity Score (0-20): Safety check (Target $5k+)
         """
-        velocity = token_data.get("velocity_1m", 0)
+        score = 0
+        verdict = "WATCH"
         
-        # Simple heuristic: Higher velocity = Higher score
-        score = min(velocity / 10, 100)  # Cap at 100
-        
-        # Boost for high velocity
-        if velocity > 100:
+        # 1. Volume Score (Max 50)
+        vol_m5 = token_data.get("volume_m5", 0)
+        if vol_m5 > 10000:
+            score += 50
+        elif vol_m5 > 5000:
+            score += 35
+        elif vol_m5 > 1000:
+            score += 15
+        elif vol_m5 > 100:
+            score += 5
+            
+        # 2. Trend Score (Max 30)
+        change_m5 = token_data.get("price_change_m5", 0)
+        if change_m5 > 20:
+            score += 30
+        elif change_m5 > 10:
+            score += 20
+        elif change_m5 > 0:
             score += 10
             
+        # 3. Liquidity Safety (Max 20)
+        liq = token_data.get("liquidity_usd", 0)
+        if liq > 10000:
+            score += 20
+        elif liq > 2000:
+            score += 10
+        elif liq < 500:
+            score -= 50 # Penalty for low liquidity (Rug risk)
+            
+        # Verdict Thresholds
+        if score >= 60 and liq > 1000:
+            verdict = "BUY"
+            
+        # Add Analysis Note
+        analysis_note = []
+        if vol_m5 > 5000: analysis_note.append("🔥 High Vol")
+        if change_m5 > 10: analysis_note.append("🚀 Pumping")
+        if liq < 1000: analysis_note.append("⚠️ Low Liq")
+        
         return {
-            "token": token_data["token"],
+            "token": token_data.get("token", "UNKNOWN"),
             "score": score,
-            "velocity": velocity,
-            "verdict": "BUY" if score > 80 else "WATCH"
+            "verdict": verdict,
+            "metrics": {
+                "vol_m5": vol_m5,
+                "change_m5": change_m5,
+                "liq": liq
+            },
+            "risk_msg": " ".join(analysis_note) if analysis_note else "Waiting for volume..."
         }

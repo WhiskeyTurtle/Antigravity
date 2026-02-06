@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ANTIGRAVITY // SOLANA ALPHA FEED</title>
+    <title>ANTIGRAVITY // ALPHA FEED</title>
     <style>
         :root {
             --bg: #050505;
@@ -44,10 +44,33 @@
             font-size: 1.5rem;
         }
 
+        .controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
         .status {
             font-size: 0.8rem;
             color: var(--accent);
             animation: blink 1s infinite;
+        }
+
+        button {
+            background: var(--panel);
+            color: var(--text);
+            border: 1px solid var(--dim);
+            padding: 5px 10px;
+            font-family: var(--font);
+            cursor: pointer;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+        }
+
+        button.active {
+            background: var(--accent);
+            color: #000;
+            border-color: var(--accent);
         }
 
         #feed {
@@ -67,6 +90,9 @@
             border-left: 3px solid var(--dim);
             background: rgba(255, 255, 255, 0.05);
             font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
         }
 
         .entry.safe {
@@ -85,11 +111,52 @@
         .timestamp {
             color: var(--dim);
             margin-right: 10px;
+            min-width: 80px;
+        }
+
+        .token-group {
+            display: flex;
+            align-items: center;
+            margin-right: 10px;
+            position: relative;
         }
 
         .token {
             font-weight: bold;
             color: #fff;
+            cursor: pointer;
+        }
+
+        .token:hover {
+            text-decoration: underline;
+        }
+
+        /* Tooltip for full address */
+        .token[title]:hover::after {
+            content: attr(title);
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            background: #333;
+            color: #fff;
+            padding: 5px;
+            border-radius: 4px;
+            white-space: nowrap;
+            z-index: 10;
+        }
+
+        .copy-btn {
+            background: transparent;
+            border: none;
+            color: var(--dim);
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-left: 5px;
+            padding: 0;
+        }
+
+        .copy-btn:hover {
+            color: var(--accent);
         }
 
         .badge {
@@ -97,7 +164,7 @@
             border-radius: 4px;
             font-size: 0.7rem;
             text-transform: uppercase;
-            margin-left: 10px;
+            margin-right: 10px;
         }
 
         .badge.safe {
@@ -138,20 +205,74 @@
         ::-webkit-scrollbar-thumb {
             background: var(--dim);
         }
+
+        /* KOL Manager Panel */
+        #kol-panel {
+            display: none;
+            background: var(--panel);
+            border: 1px solid var(--accent);
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        #kol-list {
+            max-height: 150px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            border: 1px solid var(--dim);
+            padding: 5px;
+        }
+
+        .kol-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            padding: 2px 0;
+            border-bottom: 1px solid #222;
+        }
+
+        .kol-form {
+            display: flex;
+            gap: 10px;
+        }
+
+        input {
+            background: #222;
+            border: 1px solid var(--dim);
+            color: #fff;
+            padding: 5px;
+            font-family: var(--font);
+            font-size: 0.8rem;
+        }
     </style>
 </head>
 
 <body>
     <header>
         <h1>Antigravity // Alpha Feed</h1>
-        <div style="display:flex; gap:20px; align-items:center">
+
+        <div class="controls">
+            <button onclick="toggleManager()">Manage KOLs</button>
+            <button id="pause-btn" onclick="togglePause()">⏸ PAUSE</button>
+
             <div id="pnl-board" style="font-size:0.9rem; color:#888;">
                 PNL: <span id="pnl-val" style="color:#fff">0.00 SOL</span>
                 (<span id="open-pos">0</span> Active)
             </div>
+
             <div class="status">● LIVE CONNECTED</div>
         </div>
     </header>
+
+    <div id="kol-panel">
+        <h3 style="margin-top:0; color:var(--accent)">Tracked Wallets</h3>
+        <div id="kol-list">Loading...</div>
+        <div class="kol-form">
+            <input type="text" id="new-wallet-addr" placeholder="Wallet Address" style="flex:2">
+            <input type="text" id="new-wallet-name" placeholder="Label (e.g. 'Whale 1')" style="flex:1">
+            <button onclick="addWallet()">+ Track</button>
+        </div>
+    </div>
 
     <div id="feed">
         <!-- Feed Items Go Here -->
@@ -167,6 +288,80 @@
         const logs = document.getElementById('logs');
         const socket = new WebSocket(`ws://${location.host}/ws`);
 
+        let isPaused = false;
+
+        // --- KOL Manager Logic ---
+        function toggleManager() {
+            const panel = document.getElementById('kol-panel');
+            if (panel.style.display === 'block') {
+                panel.style.display = 'none';
+            } else {
+                panel.style.display = 'block';
+                fetchWallets();
+            }
+        }
+
+        async function fetchWallets() {
+            try {
+                const res = await fetch('/api/wallets');
+                const wallets = await res.json();
+                const list = document.getElementById('kol-list');
+                list.innerHTML = '';
+
+                for (const [addr, name] of Object.entries(wallets)) {
+                    const div = document.createElement('div');
+                    div.className = 'kol-item';
+                    div.innerHTML = `
+                        <span style="color:var(--accent)">${name}</span>
+                        <span style="color:#888" title="${addr}">${addr.substring(0, 6)}...${addr.substring(addr.length - 4)}</span>
+                    `;
+                    list.appendChild(div);
+                }
+            } catch (e) {
+                console.error("Failed to fetch wallets", e);
+            }
+        }
+
+        async function addWallet() {
+            const addr = document.getElementById('new-wallet-addr').value.trim();
+            const name = document.getElementById('new-wallet-name').value.trim();
+
+            if (!addr || !name) return alert("Address and Name required");
+
+            try {
+                const res = await fetch('/api/wallets', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ address: addr, name: name })
+                });
+                const data = await res.json();
+                if (data.status === 'ok') {
+                    log(`Added wallet: ${name}`);
+                    document.getElementById('new-wallet-addr').value = '';
+                    document.getElementById('new-wallet-name').value = '';
+                    fetchWallets();
+                } else {
+                    alert("Error: " + JSON.stringify(data));
+                }
+            } catch (e) {
+                alert("Failed to add wallet");
+            }
+        }
+
+        function togglePause() {
+            isPaused = !isPaused;
+            const btn = document.getElementById('pause-btn');
+            if (isPaused) {
+                btn.innerText = "▶ RESUME";
+                btn.style.borderColor = "var(--danger)";
+                btn.style.color = "var(--danger)";
+            } else {
+                btn.innerText = "⏸ PAUSE";
+                btn.style.borderColor = "var(--dim)";
+                btn.style.color = "var(--text)";
+            }
+        }
+
         socket.onmessage = function (event) {
             const data = JSON.parse(event.data);
 
@@ -175,9 +370,12 @@
             } else if (data.type === 'snipe') {
                 addFeedItem(data, 'snipe');
             } else if (data.type === 'new_token') {
-                // Pending item
-                addFeedItem(data, 'pending');
+                // Pending item - Respect Pause
+                if (!isPaused) {
+                    addFeedItem(data, 'pending');
+                }
             } else if (data.type === 'update') {
+                // Always update existing items even if paused
                 updateFeedItem(data);
             } else if (data.type === 'pnl_update') {
                 updatePNL(data.data);
@@ -188,16 +386,25 @@
             const pnlEl = document.getElementById('pnl-val');
             const posEl = document.getElementById('open-pos');
 
-            pnlEl.innerText = stats.total_pnl.toFixed(4) + " SOL";
-            pnlEl.style.color = stats.total_pnl >= 0 ? '#00ff9d' : '#ff0055';
-
-            posEl.innerText = stats.active_positions;
+            if (pnlEl) {
+                pnlEl.innerText = stats.total_pnl.toFixed(4) + " SOL";
+                pnlEl.style.color = stats.total_pnl >= 0 ? '#00ff9d' : '#ff0055';
+            }
+            if (posEl) posEl.innerText = stats.active_positions;
         }
 
         function log(msg) {
             const div = document.createElement('div');
             div.textContent = `> ${msg}`;
             logs.insertBefore(div, logs.firstChild);
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                log(`Copied ${text.substring(0, 8)}...`);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+            });
         }
 
         function addFeedItem(data, type) {
@@ -207,20 +414,42 @@
 
             const time = data.time || new Date().toLocaleTimeString();
 
+            // Full Token Address for Copy
+            const fullToken = data.token || "Unknown";
+
             // Display token mint (truncated)
             const displayToken = data.token ? `${data.token.substring(0, 8)}...${data.token.substring(data.token.length - 4)}` : '???';
 
             if (type === 'snipe') {
                 div.innerHTML = `<span class="timestamp">[${time}]</span> ${data.msg}`;
             } else {
+                // KOL / Source Logic
+                let sourceHTML = '';
+                if (data.kol_label && data.kol_wallet) {
+                    sourceHTML = `
+                        <span class="badge" style="background:#b300ff; color:#fff">Found by: ${data.kol_label}</span>
+                        <span class="token" title="${data.kol_wallet}" onclick="copyToClipboard('${data.kol_wallet}')" style="color:#aaa; font-size:0.8rem; margin-right:10px;">
+                            [${data.kol_wallet.substring(0, 4)}..${data.kol_wallet.substring(data.kol_wallet.length - 4)}]
+                        </span>
+                    `;
+                } else {
+                    sourceHTML = `<span class="badge" style="background:#555; color:#fff">${data.source || 'UNK'}</span>`;
+                }
+
                 div.innerHTML = `
                     <span class="timestamp">[${time}]</span>
-                    <span class="badge" style="background:#555; color:#fff">${data.source || 'UNK'}</span>
-                    <span class="token">${displayToken}</span>
+                    ${sourceHTML}
+                    
+                    <div class="token-group">
+                        <span class="token" title="${fullToken}" onclick="copyToClipboard('${fullToken}')">${displayToken}</span>
+                        <button class="copy-btn" onclick="copyToClipboard('${fullToken}')">📋</button>
+                    </div>
+                    
                     ${type === 'pending' ? '<span class="badge">ANALYZING...</span>' : ''}
                 `;
             }
             feed.appendChild(div);
+            // Only auto-scroll if not paused (or maybe we still want to scroll? let's stick to standard behavior)
             feed.scrollTop = feed.scrollHeight;
         }
 
@@ -242,10 +471,11 @@
                 const scoreHTML = data.score !== undefined ? ` <span style="margin-left:10px; color:#aaa">Score: ${data.score.toFixed(1)}</span>` : '';
                 const msgHTML = data.risk_msg ? ` <span style="margin-left:10px; color:#888">${data.risk_msg}</span>` : '';
 
+                // We append to innerHTML, but we need to be careful not to duplicate if update is called multiple times
+                // For now, simpler is better since update is called once per token usually
                 el.innerHTML += statusHTML + scoreHTML + msgHTML;
             }
         }
     </script>
-</body>
 
 </html>

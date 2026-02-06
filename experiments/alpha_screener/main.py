@@ -20,6 +20,7 @@ from risk_engine import RiskEngine
 from analyzer import Analyzer
 from sniper import Sniper
 from paper_trader import PaperTrader
+from kol_monitor import KOLMonitor
 
 # Global State
 class FeedService:
@@ -45,42 +46,136 @@ class FeedService:
 
 service = FeedService()
 
+# "Smart Money" / KOL Wallets to Track
+# (Using Raydium Protocol addresses as high-volume tests for now)
+KOL_WALLETS = {
+    "8MaVa9kdt3NW4Q5HyNAm1X5LbR8PQRVDc1W8NMVK88D5": "Daumen",
+    "Cum5exPbTUGJgCUFYvQbBpJB1hibVWcdZrS7Sm9jRP2h": "Gains low rate",
+    "4vw54BmAogeRV3vPKWyFet5yf8DTLcREzdSzx4rw9Ud9": "Decu",
+    "bwamJzztZsepfkteWRChggmXuiiCQvpLqPietdNfSXa": "55k Devs",
+    "7NAd2EpYGGeFofpyvgehSXhH5vg6Ry6VRMW2Y6jiqCu1": "Cupsy Public",
+    "2fg5QD1eD7rzNNCsvnhmXFm5hqNgwTTG8p7kQ6f3rx6f": "Cupsy Bundle",
+    "Di75xbVUg3u1qcmZci3NcZ8rjFMj7tsnYEoFdEMjS4ow": "N'o",
+    "9FNz4MjPUmnJqTf6yEDbL1D4SsHVh7uA8zRHhR5K138r": "Danny",
+    "GXJ4Up4KjR4UhEPbXN7daRZtobkJzGtpnAgibECzpFRn": "Some Bundler",
+    "DNfuF1L62WWyW3pNakVkyGGFzVVhj4Yr52jSmdTyeBHm": "Patrick",
+    "6nU2L7MQVUWjtdKHVpuZA9aind73nd3rXC4YFo8KQCy4": "Some big winner",
+    "CyaE1VxvBrahnPWkqm5VsdCvyS2QmNht2UFrKJHga54o": "Cented",
+    "BCagckXeMChUKrHEd6fKFA1uiWDtcmCXMsqaheLiUPJd": "DVcs",
+    "GUDP1dP2C4S3M6dYrSXMFPumWg1Gt1s1N1FqAThsiXWZ": "HonestDevAlt1",
+    "G4MQZpoLvfRZDTdSbtbMDXf4J8GQ9VGMyzKysLhyfotL": "HoenstDevAlt",
+    "FM1YCKED2KaqB8Uat8aB1nsffR1vezr7s6FAEieXJgke": "HonestDV",
+    "3LUfv2u5yzsDtUzPdsSJ7ygPBuqwfycMkjpNreRR2Yww": "Domy",
+    "CS7SmQzJvbWJ5UtdJodDPa3nY4pjoCDs2JsUY2CyNPx7": "Barnabas",
+    "6S8GezkxYUfZy9JPtYnanbcZTMB87Wjt1qx3c6ELajKC": "High Gains",
+    "G6fUXjMKPJzCY1rveAE6Qm7wy5U3vZgKDJmN1VPAdiZC": "Clukz",
+    "4ZdCpHJrSn4E9GmfP8jjfsAExHGja2TEn4JmXfEeNtyT": "Robo"
+}
+
+# Global instances for modules
+risk_engine: RiskEngine = None
+analyzer: Analyzer = None
+sniper: Sniper = None
+paper_trader: PaperTrader = None
+kol_monitor: KOLMonitor = None
+async_client: AsyncClient = None # Global async client
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
     print("🚀 Starting Alpha Feed Service...")
-    client = AsyncClient(service.rpc_url)
-    listener = Listener(service.queue)
-    risk_engine = RiskEngine(client)
-    sniper = Sniper(client)
+    
+    global risk_engine, analyzer, sniper, paper_trader, kol_monitor, async_client
+    
+    # Initialize Clients (Helius RPC)
+    async_client = AsyncClient(service.rpc_url)
+    
+    # Start the Queue Processing Task
+    asyncio.create_task(process_feed())
+    
+    # Initialize implementation modules
+    risk_engine = RiskEngine(async_client)
     analyzer = Analyzer()
+    sniper = Sniper(async_client)
     paper_trader = PaperTrader()
     
+    # Callback for KOL Monitor to feed the main pipeline
+    async def on_kol_activity(signature, wallet_address, wallet_name, source_type):
+        import time # Import time locally if not already global
+        await service.queue.put({
+            "type": "NEW_POOL", # Ensure type is set for process_feed
+            "signature": signature,
+            "source": f"Tracked: {wallet_name}",
+            "kol_wallet": wallet_address,
+            "kol_label": wallet_name,
+            "time": time.time()
+        })
+        
+    # Start KOL Monitor
+    kol_monitor = KOLMonitor(service.rpc_url, "wss://mainnet.helius-rpc.com/?api-key=a16f485e-cca9-47be-a815-f8936034edff", KOL_WALLETS, on_kol_activity)
     service.running = True
-    asyncio.create_task(listener.start())
-    asyncio.create_task(process_feed(listener, risk_engine, sniper, analyzer, paper_trader))
+    asyncio.create_task(kol_monitor.start())
+    
+    # NOTE: Disabled generic "All New Tokens" listener to focus on KOLs as requested
+    # listener = Listener(service.queue)
+    # asyncio.create_task(listener.start())
     
     yield
     
     # Shutdown
+    # Shutdown
     print("🛑 Shutting down...")
     service.running = False
-    listener.stop()
-    await client.close()
+    if kol_monitor:
+        kol_monitor.stop()
+    if async_client:
+        await async_client.close()
+
+
+from fastapi import FastAPI, WebSocket, Request, Body
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel
+
+# ... imports ...
 
 app = FastAPI(lifespan=lifespan)
 app.mount("/static", StaticFiles(directory="experiments/alpha_screener/static"), name="static")
 
-async def process_feed(listener, risk_engine, sniper, analyzer, paper_trader):
+class WalletItem(BaseModel):
+    address: str
+    name: str
+
+@app.post("/api/wallets")
+async def add_wallet(item: WalletItem):
+    """Add a new KOL wallet to track"""
+    if kol_monitor:
+        await kol_monitor.add_wallet(item.address, item.name)
+        # Update global list
+        KOL_WALLETS[item.address] = item.name
+        return {"status": "ok", "msg": f"Added {item.name}"}
+    return JSONResponse(status_code=503, content={"error": "Monitor not active"})
+
+@app.get("/api/wallets")
+async def get_wallets():
+    """Get list of tracked wallets"""
+    if kol_monitor:
+        return kol_monitor.kols
+    return KOL_WALLETS
+
+async def process_feed():
     """Background loop to process events and update clients"""
     last_heartbeat = 0
     last_pnl_check = 0
     import time
     
+    # Import globals
+    global risk_engine, analyzer, sniper, paper_trader, async_client
+    
     print("🚀 Starting Alpha Feed Service...")
     
     # Initialize Clients (Helius RPC)
-    async_client = AsyncClient("https://mainnet.helius-rpc.com/?api-key=a16f485e-cca9-47be-a815-f8936034edff")
     
     while service.running:
 
@@ -126,20 +221,40 @@ async def process_feed(listener, risk_engine, sniper, analyzer, paper_trader):
                             commitment=Confirmed
                         )
                         if tx.value:
+                            meta = tx.value.transaction.meta
+                            if meta.err:
+                                print(f"⚠️ Transaction failed on-chain: {signature}")
+                                token_mint = "FAILED_TX" 
+                                break
+
                             # Look for the first mint that is NOT SOL (So111...)
-                            balances = tx.value.transaction.meta.post_token_balances
+                            balances = meta.post_token_balances
+                            if not balances:
+                                # Fallback to pre_token_balances
+                                balances = meta.pre_token_balances
+                            
+                            if not balances:
+                                print(f"ℹ️ No token balances (Likely SOL transfer): {signature}")
+                                token_mint = "SOL_TRANSFER"
+                                break
+
                             for balance in balances:
                                 mint_addr = str(balance.mint)
                                 if mint_addr != "So11111111111111111111111111111111111111112":
                                     token_mint = mint_addr
+                                    print(f"✅ Resolved Mint: {token_mint}")
                                     break
+                        else:
+                            print(f"⚠️ get_transaction returned None value for {signature}")
+
                         if token_mint:
                             break
                     except Exception as exc:
                         if "429" in str(exc):
+                            print(f"⚠️ RPC 429 (Rate Limit) fetching {signature}")
                             await asyncio.sleep(2) # Backoff
                         else:
-                            print(f"RPC Error resolving mint: {exc}")
+                            print(f"⚠️ RPC Error resolving mint: {exc}")
                         await asyncio.sleep(1)
             except Exception as e:
                 print(f"⚠️ Failed to resolve mint for {signature}: {e}")
@@ -167,8 +282,16 @@ async def process_feed(listener, risk_engine, sniper, analyzer, paper_trader):
                 is_safe, risk_msg = False, "Incomplete data (Resolution failed)"
             
             if is_safe:
-                # 3. Analyze
-                analysis = analyzer.score_token({"token": str(token_mint)})
+                # 3. Analyze (Fetch Market Data First)
+                market_data = await paper_trader.engine.get_token_price(token_mint)
+                market_data["token"] = token_mint
+                
+                analysis = analyzer.score_token(market_data)
+                
+                # Format metrics for UI
+                metrics = analysis.get("metrics", {})
+                vol_str = f"${metrics.get('vol_m5', 0):,.0f}"
+                liq_str = f"${metrics.get('liq', 0):,.0f}"
                 
                 await service.broadcast({
                     "type": "update",
@@ -176,13 +299,19 @@ async def process_feed(listener, risk_engine, sniper, analyzer, paper_trader):
                     "token": str(token_mint),
                     "status": "BUY_SIGNAL" if analysis["verdict"] == "BUY" else "WATCH",
                     "score": analysis["score"],
-                    "risk_msg": "✅ Safe to trade"
+                    "risk_msg": f"{analysis.get('risk_msg', '')} | Vol: {vol_str} | Liq: {liq_str}"
                 })
                 
                 if analysis["verdict"] == "BUY":
                     # Auto-Snipe Signal
                     try:
                         token_id = str(token_mint)
+                        # We use the price from market_data if available
+                        price_sol = market_data.get("price_sol", 0) or 0.0001
+                        
+                        await paper_trader.open_position(signature, token_id, price_sol, 1000)
+                    except Exception as e:
+                        print(f"Sniper Error: {e}")
                         
                         # Check Price (Real)
                         quote = await paper_trader.engine.get_token_price(token_id)
