@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ANTIGRAVITY // TRADE HISTORY</title>
+    <style>
+        :root {
+            --bg: #050505;
+            --panel: #111;
+            --accent: #00ff9d;
+            --danger: #ff0055;
+            --text: #eee;
+            --dim: #555;
+            --font: 'Courier New', monospace;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: var(--font);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        header {
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            margin: 0;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-size: 1.5rem;
+        }
+
+        a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        #history-panel {
+            flex: 1;
+            background: var(--panel);
+            border: 1px solid var(--dim);
+            padding: 15px;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+
+        th {
+            text-align: left;
+            padding: 10px;
+            border-bottom: 1px solid var(--accent);
+            color: var(--accent);
+            font-weight: normal;
+            position: sticky;
+            top: 0;
+            background: var(--panel);
+        }
+
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #222;
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .pnl-positive {
+            color: var(--accent);
+        }
+
+        .pnl-negative {
+            color: var(--danger);
+        }
+
+        .badge {
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            background: #333;
+            color: #ccc;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Antigravity // Trade History</h1>
+        <div style="font-size:1.2rem;">
+            <a href="/">← BACK TO DASHBOARD</a>
+        </div>
+    </header>
+
+    <div id="history-panel">
+        <table id="history-table">
+            <thead>
+                <tr>
+                    <th>TOKEN</th>
+                    <th>RESULT</th>
+                    <th>PNL (SOL)</th>
+                    <th>PNL %</th>
+                    <th>ENTRY SOL</th>
+                    <th>ENTRY PRICE</th>
+                    <th>EXIT PRICE</th>
+                    <th>DURATION</th>
+                    <th>REASON</th>
+                </tr>
+            </thead>
+            <tbody id="history-body">
+                <tr>
+                    <td colspan="9" style="text-align:center; padding:20px;">Loading history...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div id="stats-footer"
+        style="margin-top:20px; border-top:1px solid var(--dim); padding-top:10px; display:flex; gap:20px; font-size:0.9rem;">
+        <div>Total Trades: <span id="total-trades" style="color:#fff">0</span></div>
+        <div>Win Rate: <span id="win-rate" style="color:var(--accent)">0%</span></div>
+        <div>Total PnL: <span id="total-pnl" style="color:#fff">0.00 SOL</span></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', loadHistory);
+
+        async function loadHistory() {
+            try {
+                const res = await fetch('/api/history');
+                const history = await res.json();
+                renderTable(history);
+            } catch (e) {
+                document.getElementById('history-body').innerHTML = '<tr><td colspan="9" style="color:var(--danger); text-align:center;">Failed to load history</td></tr>';
+                console.error(e);
+            }
+        }
+
+        function renderTable(trades) {
+            const tbody = document.getElementById('history-body');
+            tbody.innerHTML = '';
+
+            if (!trades || trades.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:20px; color:var(--dim);">No completed trades recorded.</td></tr>';
+                return;
+            }
+
+            // Reverse to show newest first
+            const sortedTrades = [...trades].reverse();
+
+            let wins = 0;
+            let totalPnL = 0;
+
+            sortedTrades.forEach(trade => {
+                const row = document.createElement('tr');
+
+                const isWin = trade.pnl >= 0;
+                if (isWin) wins++;
+                totalPnL += trade.pnl;
+
+                const pnlClass = isWin ? 'pnl-positive' : 'pnl-negative';
+                const sign = isWin ? '+' : '';
+
+                // Fallbacks for missing fields in old data
+                const pnlPct = trade.pnl_pct !== undefined ? trade.pnl_pct : 0;
+                const entrySol = trade.entry_sol_amount || 0;
+
+                const durationMin = (trade.duration / 60).toFixed(1) + 'm';
+
+                const axiomLink = trade.pair_address ?
+                    `https://axiom.trade/meme/${trade.pair_address}?chain=sol` :
+                    `https://axiom.trade/discover?q=${trade.token}`;
+
+                row.innerHTML = `
+                    <td>
+                        <a href="${axiomLink}" target="_blank" title="${trade.token}">${trade.token.substring(0, 8)}...</a>
+                    </td>
+                    <td class="${pnlClass}">${isWin ? 'WIN' : 'LOSS'}</td>
+                    <td class="${pnlClass}">${sign}${trade.pnl.toFixed(4)}</td>
+                    <td class="${pnlClass}">${sign}${pnlPct.toFixed(2)}%</td>
+                    <td>${entrySol.toFixed(4)}</td>
+                    <td>${(trade.entry_price || 0).toFixed(9)}</td> 
+                    <td>${trade.sell_price.toFixed(9)}</td>
+                    <td>${durationMin}</td>
+                    <td><span class="badge" style="background:${trade.reason === 'TAKE_PROFIT' ? '#004400' : '#440000'}">${trade.reason}</span></td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            // Update Stats
+            document.getElementById('total-trades').innerText = trades.length;
+            const winRate = trades.length > 0 ? (wins / trades.length * 100).toFixed(1) : 0;
+            document.getElementById('win-rate').innerText = winRate + '%';
+
+            const pnlEl = document.getElementById('total-pnl');
+            pnlEl.innerText = (totalPnL >= 0 ? '+' : '') + totalPnL.toFixed(4) + ' SOL';
+            pnlEl.style.color = totalPnL >= 0 ? 'var(--accent)' : 'var(--danger)';
+        }
+    </script>
+</body>
+
+</html>

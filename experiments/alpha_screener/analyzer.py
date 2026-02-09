@@ -15,43 +15,46 @@ class Analyzer:
         score = 0
         verdict = "WATCH"
         
-        # 1. Volume Score (Max 50)
-        vol_m5 = token_data.get("volume_m5", 0)
-        if vol_m5 > 10000:
-            score += 50
-        elif vol_m5 > 5000:
-            score += 35
-        elif vol_m5 > 1000:
-            score += 15
-        elif vol_m5 > 100:
-            score += 5
-            
-        # 2. Trend Score (Max 30)
-        change_m5 = token_data.get("price_change_m5", 0)
-        if change_m5 > 20:
+        # 1. Volume Check (Max 30)
+        vol_m5 = token_data.get("volume_m5", token_data.get("volume_h1", 0) / 12)
+        if vol_m5 > 50000:
             score += 30
-        elif change_m5 > 10:
+        elif vol_m5 > 10000:
             score += 20
-        elif change_m5 > 0:
+        elif vol_m5 > 1000:
+            score += 15 # Boosted from 10
+            
+        # 2. Price Momentum (Max 30)
+        price_change_m5 = token_data.get("price_change_m5", 0)
+        if price_change_m5 > 50:
+            score += 30
+        elif price_change_m5 > 20:
+            score += 20
+        elif price_change_m5 > 0:
             score += 10
             
-        # 3. Liquidity Safety (Max 20)
+        # 3. Liquidity Safety (Max 30)
         liq = token_data.get("liquidity_usd", 0)
-        if liq > 10000:
-            score += 20
-        elif liq > 2000:
-            score += 10
-        elif liq < 500:
-            score -= 50 # Penalty for low liquidity (Rug risk)
+        if liq > 25000:
+            score += 30
+        elif liq > 10000:
+            score += 25 # Boosted from 15
+        elif liq > 5000:
+            score += 10 # New Tier
+        elif liq < 4000:
+            score -= 100 # Relaxed slightly from 5k
             
         # Verdict Thresholds
-        if score >= 60 and liq > 1000:
+        # Require higher score and safe liquidity
+        if score >= 50 and liq > 8000:
             verdict = "BUY"
             
+        print(f"📊 ANALYZER: {token_data.get('token', '???')[:8]} | Score: {score} | Liq: ${liq:,.0f} | Verdict: {verdict}")
+        
         # Add Analysis Note
         analysis_note = []
         if vol_m5 > 5000: analysis_note.append("🔥 High Vol")
-        if change_m5 > 10: analysis_note.append("🚀 Pumping")
+        if price_change_m5 > 10: analysis_note.append("🚀 Pumping")
         if liq < 1000: analysis_note.append("⚠️ Low Liq")
         
         return {
@@ -60,7 +63,7 @@ class Analyzer:
             "verdict": verdict,
             "metrics": {
                 "vol_m5": vol_m5,
-                "change_m5": change_m5,
+                "change_m5": price_change_m5,
                 "liq": liq
             },
             "risk_msg": " ".join(analysis_note) if analysis_note else "Waiting for volume..."

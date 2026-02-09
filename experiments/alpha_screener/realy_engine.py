@@ -55,6 +55,12 @@ class RealyEngine:
                         fdv = float(best_pair.get("fdv", 0))
                         pair_id = best_pair.get("pairAddress", "")
                         
+                        # Extract Metadata (Images/Socials)
+                        info = best_pair.get("info", {})
+                        image_url = info.get("imageUrl", "")
+                        websites = info.get("websites", [])
+                        socials = info.get("socials", [])
+                        
                         return {
                             "price_sol": price_native,
                             "price_usd": price_usd,
@@ -64,9 +70,13 @@ class RealyEngine:
                             "liquidity_usd": liquidity_usd,
                             "fdv": fdv,
                             "pair_address": pair_id,
-                            "liquidity_check": True,
-                            "source": "DEXSCREENER"
+                            "image_url": image_url,
+                            "websites": websites,
+                            "socials": socials
                         }
+                    else:
+                        print(f"⚠️ DexScreener API returned status {response.status}")
+                        return await self.check_liquidity_via_rpc(token_mint)
 
         except Exception as e:
             print(f"⚠️ RealyEngine Error (DexScreener): {e}")

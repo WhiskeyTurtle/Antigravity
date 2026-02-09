@@ -89,8 +89,10 @@ class BirdTwitterStream:
     Requires: npm install -g @steipete/bird
     Auth: Export cookies from your logged-in X session to ~/.bird/cookies.json
     """
-    def __init__(self, callback):
+    def __init__(self, callback, auth_token=None, ct0=None):
         self.callback = callback
+        self.auth_token = auth_token
+        self.ct0 = ct0
         self.influencers = [
             {"handle": "0x3ddy", "name": "0x3ddy", "impact": 100},
             {"handle": "daumenxyz", "name": "Daumen", "impact": 95},
@@ -109,6 +111,11 @@ class BirdTwitterStream:
         logger.info("🐦 Bird Twitter Stream Started (Live X Monitoring...)")
         
         # Check if bird is available
+        import os
+        env = os.environ.copy()
+        if self.auth_token: env["AUTH_TOKEN"] = self.auth_token
+        if self.ct0: env["CT0"] = self.ct0
+
         try:
             result = subprocess.run(
                 [BIRD_CMD, "whoami"], 
@@ -116,12 +123,13 @@ class BirdTwitterStream:
                 text=True, 
                 encoding='utf-8',
                 errors='replace',
+                env=env,
                 timeout=10
             )
             if result.returncode == 0:
                 logger.info(f"🔑 Bird Auth OK: {result.stdout.strip()}")
             else:
-                logger.warning(f"⚠️ Bird auth issue: {result.stderr}. Falling back to Mock.")
+                logger.warning(f"⚠️ Bird auth issue: {result.stderr.strip()}. Falling back to Mock.")
                 # Fall back to mock stream
                 mock = MockTwitterStream(self.callback)
                 await mock.start()
@@ -148,6 +156,11 @@ class BirdTwitterStream:
         handle = influencer["handle"]
         
         try:
+            import os
+            env = os.environ.copy()
+            if self.auth_token: env["AUTH_TOKEN"] = self.auth_token
+            if self.ct0: env["CT0"] = self.ct0
+
             # Run bird user-tweets command
             result = subprocess.run(
                 [BIRD_CMD, "user-tweets", handle, "-n", "5", "--json"],
@@ -155,11 +168,12 @@ class BirdTwitterStream:
                 text=True,
                 encoding='utf-8',
                 errors='replace',
+                env=env,
                 timeout=30
             )
             
             if result.returncode != 0:
-                logger.warning(f"bird user-tweets failed for @{handle}: {result.stderr}")
+                logger.warning(f"bird user-tweets failed for @{handle}: {result.stderr.strip()}")
                 return
             
             # Parse JSON output
@@ -201,13 +215,13 @@ class BirdTwitterStream:
 
 
 class SocialMonitor:
-    def __init__(self, callback, use_live=True):
+    def __init__(self, callback, use_live=True, auth_token=None, ct0=None):
         self.callback = callback
         self.client = TelegramClient('anon', API_ID, API_HASH)
         self.use_live = use_live
         
         if use_live:
-            self.twitter_stream = BirdTwitterStream(callback)
+            self.twitter_stream = BirdTwitterStream(callback, auth_token=auth_token, ct0=ct0)
         else:
             self.twitter_stream = MockTwitterStream(callback)
 

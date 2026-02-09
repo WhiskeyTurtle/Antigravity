@@ -80,8 +80,7 @@
             padding: 10px;
             background: var(--panel);
             display: flex;
-            flex-direction: column-reverse;
-            /* Newest at bottom like terminal */
+            flex-direction: column;
         }
 
         .entry {
@@ -193,17 +192,36 @@
             }
         }
 
-        /* Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--bg);
-        }
-
         ::-webkit-scrollbar-thumb {
             background: var(--dim);
+        }
+
+        /* Metadata Styles */
+        .token-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            margin-right: 12px;
+            border: 1px solid var(--dim);
+        }
+
+        .link-group {
+            display: flex;
+            gap: 8px;
+            margin-left: 15px;
+            align-items: center;
+        }
+
+        .link-icon {
+            text-decoration: none;
+            font-size: 1.1rem;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+
+        .link-icon:hover {
+            opacity: 1;
+            color: var(--accent);
         }
 
         /* KOL Manager Panel */
@@ -314,7 +332,9 @@
         <h1>Antigravity // Alpha Feed</h1>
 
         <div class="controls">
+            <button onclick="window.location.href='/history'">📜 History</button>
             <button onclick="toggleManager()">Manage KOLs</button>
+            <button onclick="toggleSettings()">⚙️ Settings</button>
             <button id="pause-btn" onclick="togglePause()">⏸ PAUSE</button>
 
             <div id="pnl-board" style="font-size:0.9rem; color:#888;">
@@ -337,6 +357,37 @@
         </div>
     </div>
 
+    <!-- Settings Panel -->
+    <div id="settings-panel"
+        style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:var(--panel); border:2px solid var(--accent); padding:20px; z-index:1000; min-width:400px;">
+        <h3 style="margin-top:0; color:var(--accent); font-size:1rem;">⚙️ SETTINGS</h3>
+
+        <div style="margin-bottom:15px;">
+            <label style="display:block; margin-bottom:5px; color:var(--dim);">SOL Amount Range (per trade)</label>
+            <div style="display:flex; gap:10px; align-items:center;">
+                <div style="flex:1;">
+                    <label style="font-size:0.8rem; color:var(--dim);">Min SOL</label>
+                    <input type="number" id="sol-min" step="0.01" min="0.01" placeholder="0.1"
+                        style="width:100%; padding:8px; background:var(--bg); border:1px solid var(--dim); color:var(--text); font-family:var(--font);">
+                </div>
+                <div style="flex:1;">
+                    <label style="font-size:0.8rem; color:var(--dim);">Max SOL</label>
+                    <input type="number" id="sol-max" step="0.01" min="0.01" placeholder="0.5"
+                        style="width:100%; padding:8px; background:var(--bg); border:1px solid var(--dim); color:var(--text); font-family:var(--font);">
+                </div>
+            </div>
+            <div style="margin-top:5px; font-size:0.75rem; color:var(--dim);">
+                System will randomly choose an amount between min and max for each trade
+            </div>
+        </div>
+
+        <div style="display:flex; gap:10px; justify-content:flex-end;">
+            <button onclick="toggleSettings()" style="background:var(--bg);">Cancel</button>
+            <button onclick="saveSettings()"
+                style="background:var(--accent); color:#000; border-color:var(--accent);">Save Settings</button>
+        </div>
+    </div>
+
     <!-- Live Trades Panel -->
     <div id="trades-panel">
         <h3 style="margin-top:0; color:var(--accent); font-size:1rem; margin-bottom:10px;">📊 ACTIVE POSITIONS</h3>
@@ -344,6 +395,7 @@
             <thead>
                 <tr>
                     <th>TOKEN</th>
+                    <th>SOL USED</th>
                     <th>ENTRY MCAP</th>
                     <th>CURRENT MCAP</th>
                     <th>PNL (SOL)</th>
@@ -354,7 +406,7 @@
             </thead>
             <tbody id="trades-body">
                 <tr>
-                    <td colspan="7" style="text-align:center; color:var(--dim); padding:20px;">No active positions</td>
+                    <td colspan="8" style="text-align:center; color:var(--dim); padding:20px;">No active positions</td>
                 </tr>
             </tbody>
         </table>
@@ -434,6 +486,67 @@
             }
         }
 
+        // --- Settings Logic ---
+        async function toggleSettings() {
+            const panel = document.getElementById('settings-panel');
+            if (panel.style.display === 'block') {
+                panel.style.display = 'none';
+            } else {
+                panel.style.display = 'block';
+                await loadSettings();
+            }
+        }
+
+        async function loadSettings() {
+            try {
+                const res = await fetch('/api/settings');
+                const settings = await res.json();
+
+                document.getElementById('sol-min').value = settings.sol_amount_min || 0.1;
+                document.getElementById('sol-max').value = settings.sol_amount_max || 0.5;
+            } catch (e) {
+                console.error("Failed to load settings", e);
+            }
+        }
+
+        async function saveSettings() {
+            const solMin = parseFloat(document.getElementById('sol-min').value);
+            const solMax = parseFloat(document.getElementById('sol-max').value);
+
+            if (isNaN(solMin) || isNaN(solMax)) {
+                return alert("Please enter valid numbers");
+            }
+
+            if (solMin <= 0 || solMax <= 0) {
+                return alert("SOL amounts must be positive");
+            }
+
+            if (solMin > solMax) {
+                return alert("Min must be less than or equal to Max");
+            }
+
+            try {
+                const res = await fetch('/api/settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sol_amount_min: solMin,
+                        sol_amount_max: solMax
+                    })
+                });
+
+                const data = await res.json();
+                if (data.status === 'ok') {
+                    log(`✅ Settings updated: ${solMin} - ${solMax} SOL per trade`);
+                    toggleSettings();
+                } else {
+                    alert(data.error || "Failed to update settings");
+                }
+            } catch (e) {
+                alert("Error: " + e.message);
+            }
+        }
+
         function togglePause() {
             isPaused = !isPaused;
             const btn = document.getElementById('pause-btn');
@@ -481,7 +594,7 @@
             const tbody = document.getElementById('trades-body');
 
             if (!positions || positions.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--dim); padding:20px;">No active positions</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:var(--dim); padding:20px;">No active positions</td></tr>';
                 return;
             }
 
@@ -506,6 +619,7 @@
                     <td>
                         <a href="${axiomLink}" target="_blank" style="color:var(--accent); text-decoration:none;" title="View on Axiom (Pair: ${pos.pair_address || 'N/A'})">${pos.token.substring(0, 8)}...</a>
                     </td>
+                    <td>${pos.entry_sol_amount.toFixed(4)} SOL</td>
                     <td>${formatMCap(pos.entry_fdv)}</td>
                     <td>${formatMCap(pos.current_fdv)}</td>
                     <td class="${pnlClass}">${pnlSign}${pos.pnl_sol.toFixed(4)}</td>
@@ -592,9 +706,16 @@
                     ${type === 'pending' ? '<span class="badge">ANALYZING...</span>' : ''}
                 `;
             }
-            feed.appendChild(div);
-            // Only auto-scroll if not paused (or maybe we still want to scroll? let's stick to standard behavior)
-            feed.scrollTop = feed.scrollHeight;
+            // Maintain scroll position if not at the top
+            const isAtTop = feed.scrollTop === 0;
+            const oldHeight = feed.scrollHeight;
+
+            feed.prepend(div);
+
+            if (!isAtTop) {
+                // Pin scroll to the item user was looking at
+                feed.scrollTop += (feed.scrollHeight - oldHeight);
+            }
         }
 
         function updateFeedItem(data) {
@@ -623,14 +744,44 @@
                     analyzingBadge.remove();
                 }
 
+                // Add Metadata (Image and Links)
+                if (data.image_url) {
+                    const img = document.createElement('img');
+                    img.src = data.image_url;
+                    img.className = 'token-icon';
+                    el.prepend(img);
+                }
+
                 // Add status badge and additional info
                 const statusHTML = `<span class="badge ${badgeClass}" style="${data.status === 'SUPER_ALPHA' ? 'background:#FFD700; color:#000' : ''}">${displayStatus}</span>`;
                 const scoreHTML = data.score !== undefined ? ` <span style="margin-left:10px; color:#aaa">Score: ${data.score.toFixed(1)}</span>` : '';
                 const msgHTML = data.risk_msg ? ` <span style="margin-left:10px; color:#888">${data.risk_msg}</span>` : '';
 
-                // We append to innerHTML, but we need to be careful not to duplicate if update is called multiple times
-                // For now, simpler is better since update is called once per token usually
-                el.innerHTML += statusHTML + scoreHTML + msgHTML;
+                // Links
+                let linksHTML = '<div class="link-group">';
+
+                // 🌐 Website
+                if (data.websites && data.websites.length > 0) {
+                    linksHTML += `<a href="${data.websites[0].url}" target="_blank" class="link-icon" title="Website">🌐</a>`;
+                }
+
+                // 📱 Socials
+                if (data.socials) {
+                    data.socials.forEach(s => {
+                        let icon = '🔗';
+                        if (s.type === 'twitter') icon = '𝕏';
+                        if (s.type === 'telegram') icon = '📱';
+                        linksHTML += `<a href="${s.url}" target="_blank" class="link-icon" title="${s.type}">${icon}</a>`;
+                    });
+                }
+
+                // 🔍 X Search (Always)
+                const xSearchUrl = `https://x.com/search?q=${data.token}`;
+                linksHTML += `<a href="${xSearchUrl}" target="_blank" class="link-icon" title="Search on X">🔍</a>`;
+
+                linksHTML += '</div>';
+
+                el.innerHTML += statusHTML + scoreHTML + msgHTML + linksHTML;
             }
         }
     </script>

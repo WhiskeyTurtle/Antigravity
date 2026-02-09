@@ -30,6 +30,33 @@ class FeedService:
         self.queue = asyncio.Queue()
         self.running = False
         self.rpc_url = "https://mainnet.helius-rpc.com/?api-key=a16f485e-cca9-47be-a815-f8936034edff"
+        self.settings = self.load_settings()
+        
+    def load_settings(self):
+        """Load settings from disk or use defaults"""
+        settings_file = "experiments/alpha_screener/settings.json"
+        try:
+            if os.path.exists(settings_file):
+                with open(settings_file, 'r') as f:
+                    return json.load(f)
+        except Exception as e:
+            print(f"⚠️ Failed to load settings: {e}")
+        
+        # Default settings
+        return {
+            "sol_amount_min": 0.1,
+            "sol_amount_max": 0.5
+        }
+    
+    def save_settings(self):
+        """Save settings to disk"""
+        settings_file = "experiments/alpha_screener/settings.json"
+        try:
+            with open(settings_file, 'w') as f:
+                json.dump(self.settings, f, indent=2)
+            print(f"✅ Settings saved: {self.settings}")
+        except Exception as e:
+            print(f"⚠️ Failed to save settings: {e}")
         
     async def connect(self, websocket: WebSocket):
         await websocket.accept()
@@ -93,6 +120,7 @@ async def lifespan(app: FastAPI):
     
     # Start the Queue Processing Task
     asyncio.create_task(process_feed())
+    asyncio.create_task(monitor_positions_task())
     
     # Initialize implementation modules
     risk_engine = RiskEngine(async_client)
@@ -102,9 +130,9 @@ async def lifespan(app: FastAPI):
     
     # MONITOR CALLBACKS
     async def on_kol_activity(signature, wallet_address, wallet_name, source_type):
-        import time # Import time locally if not already global
+        import time 
         await service.queue.put({
-            "type": "NEW_POOL", # Ensure type is set for process_feed
+            "type": "NEW_POOL", 
             "signature": signature,
             "source": f"Tracked: {wallet_name}",
             "kol_wallet": wallet_address,
@@ -116,7 +144,7 @@ async def lifespan(app: FastAPI):
         """Handles events from SocialMonitor (Twitter/Telegram)"""
         await service.queue.put({
             "type": "SOCIAL_SIGNAL",
-            "data": event # Pass the whole dict
+            "data": event 
         })
         
     # Start KOL Monitor
@@ -125,16 +153,14 @@ async def lifespan(app: FastAPI):
     asyncio.create_task(kol_monitor.start())
 
     # Start Social Monitor
-    social_monitor = SocialMonitor(on_social_signal)
+    # User provided tokens for Jack Diamond account
+    auth_token = "ec35e4dc84ec7b2cd5a9cefd07157f4a345c2090"
+    ct0 = "9f1398a6d5f1071609ef4e7fb22d5868de481a65e2c3e8b0d3396a2ca4d1d9c1692cebfc42bf44407eedf076ad5c69dc730ced1d5971963fa78cd28210ac7f320a34f3dc7fd851cfda6954bbf7d8810b"
+    social_monitor = SocialMonitor(on_social_signal, auth_token=auth_token, ct0=ct0)
     asyncio.create_task(social_monitor.start())
-    
-    # NOTE: Disabled generic "All New Tokens" listener to focus on KOLs as requested
-    # listener = Listener(service.queue)
-    # asyncio.create_task(listener.start())
     
     yield
     
-    # Shutdown
     # Shutdown
     print("🛑 Shutting down...")
     service.running = False
@@ -149,8 +175,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
-
-# ... imports ...
 
 app = FastAPI(lifespan=lifespan)
 app.mount("/static", StaticFiles(directory="experiments/alpha_screener/static"), name="static")
@@ -176,18 +200,89 @@ async def get_wallets():
         return kol_monitor.kols
     return KOL_WALLETS
 
+class SettingsUpdate(BaseModel):
+    sol_amount_min: float
+    sol_amount_max: float
+
+@app.get("/api/settings")
+async def get_settings():
+    """Get current settings"""
+    return service.settings
+
+@app.post("/api/settings")
+async def update_settings(settings: SettingsUpdate):
+    """Update SOL amount settings"""
+    if settings.sol_amount_min <= 0 or settings.sol_amount_max <= 0:
+        return JSONResponse(status_code=400, content={"error": "SOL amounts must be positive"})
+    
+    if settings.sol_amount_min > settings.sol_amount_max:
+        return JSONResponse(status_code=400, content={"error": "Min must be less than or equal to max"})
+    
+    service.settings["sol_amount_min"] = settings.sol_amount_min
+    service.settings["sol_amount_max"] = settings.sol_amount_max
+    service.save_settings()
+    
+    return {"status": "ok", "settings": service.settings}
+
+async def monitor_positions_task():
+    """Dedicated high-frequency loop for tracking active positions"""
+    print("⚡ Starting High-Frequency Position Monitor...")
+    import time
+    while service.running:
+        try:
+            if not paper_trader:
+                await asyncio.sleep(1)
+                continue
+                
+            start_time = time.time()
+            
+            # 1. Update Positions (Parallel Fetch)
+            closed_trades = await paper_trader.update_positions()
+            
+            # 2. Broadcast Closed Trades
+            for trade in closed_trades:
+                pnl_sign = "+" if trade['pnl'] >= 0 else ""
+                await service.broadcast({
+                    "type": "snipe",
+                    "msg": f"💰 PAPER SELL ({trade['reason']}): {trade['token'][:8]}... PNL: {pnl_sign}{trade['pnl']:.4f} SOL (MCap: ${trade['sell_fdv']:,.0f})"
+                })
+
+            # 3. Broadcast Updated Positions (Real-time updates)
+            if active_count > 0:
+                positions = paper_trader.get_positions()
+                await service.broadcast({
+                    "type": "positions_update",
+                    "data": positions
+                })
+
+            # 4. Adaptive Rate Limiting
+            active_count = len(paper_trader.positions)
+            duration = time.time() - start_time
+            
+            if active_count == 0:
+                sleep_time = 5.0 # Sleep longer if nothing to track
+            elif active_count < 3:
+                sleep_time = max(0.5 - duration, 0.5) # Aim for 0.5s interval (near real-time)
+            elif active_count < 10:
+                sleep_time = max(0.5 - duration, 0.5) # Aim for 0.5s interval
+            else:
+                sleep_time = max(1.0 - duration, 1.0) # Aim for 1s interval for many positions
+                
+            await asyncio.sleep(sleep_time)
+            
+        except Exception as e:
+            print(f"⚠️ Monitor Loop Error: {e}")
+            await asyncio.sleep(5)
+
 async def process_feed():
     """Background loop to process events and update clients"""
     last_heartbeat = 0
-    last_pnl_check = 0
     import time
     
     # Import globals
     global risk_engine, analyzer, sniper, paper_trader, async_client
     
     print("🚀 Starting Alpha Feed Service...")
-    
-    # Initialize Clients (Helius RPC)
     
     while service.running:
 
@@ -198,31 +293,23 @@ async def process_feed():
             await service.broadcast({"type": "log", "msg": "❤️ System Pulse: Scanning Mempool..."})
             
             # Broadcast PNL Stats
-            stats = paper_trader.get_stats()
-            await service.broadcast({
-                "type": "pnl_update",
-                "data": stats
-            })
-            
-            # Broadcast Active Positions
-            positions = paper_trader.get_positions()
-            await service.broadcast({
-                "type": "positions_update",
-                "data": positions
-            })
+            if paper_trader:
+                stats = paper_trader.get_stats()
+                await service.broadcast({
+                    "type": "pnl_update",
+                    "data": stats
+                })
+                
+                # Broadcast Active Positions
+                positions = paper_trader.get_positions()
+                if positions:
+                    print(f"📡 Broadcasting {len(positions)} active positions")
+                await service.broadcast({
+                    "type": "positions_update",
+                    "data": positions
+                })
             
             last_heartbeat = current_time
-
-        # Check Paper Positions every 10s
-        if current_time - last_pnl_check > 10:
-            closed_trades = await paper_trader.update_positions()
-            for trade in closed_trades:
-                pnl_sign = "+" if trade['pnl'] >= 0 else ""
-                await service.broadcast({
-                    "type": "snipe",
-                    "msg": f"💰 PAPER SELL ({trade['reason']}): {trade['token'][:8]}... PNL: {pnl_sign}{trade['pnl']:.4f} SOL (MCap: ${trade['sell_fdv']:,.0f})"
-                })
-            last_pnl_check = current_time
 
         try:
             # Wait for event with timeout so we can heartbeat
@@ -236,6 +323,7 @@ async def process_feed():
             
             # RESOLVE MINT FROM SIGNATURE
             token_mint = None
+            sol_amount = 0  # Track SOL amount for KOL filtering
             try:
                 # 5 Retries for RPC (Public RPCs are flaky)
                 for _ in range(5):
@@ -251,6 +339,14 @@ async def process_feed():
                                 print(f"⚠️ Transaction failed on-chain: {signature}")
                                 token_mint = "FAILED_TX" 
                                 break
+
+                            # Extract SOL amount from pre/post balances
+                            if meta.pre_balances and meta.post_balances:
+                                # Calculate SOL change (absolute value)
+                                for i, (pre, post) in enumerate(zip(meta.pre_balances, meta.post_balances)):
+                                    sol_change = abs(pre - post) / 1e9  # Convert lamports to SOL
+                                    if sol_change > sol_amount:
+                                        sol_amount = sol_change
 
                             # Look for the first mint that is NOT SOL (So111...)
                             balances = meta.post_token_balances
@@ -284,6 +380,11 @@ async def process_feed():
             except Exception as e:
                 print(f"⚠️ Failed to resolve mint for {signature}: {e}")
 
+            # Filter KOL trades under 0.23 SOL (likely top-buying manipulation)
+            if event.get("kol_wallet") and sol_amount < 0.23:
+                print(f"⏩ Skipping KOL trade from {event.get('kol_label', 'Unknown')}: {sol_amount:.4f} SOL (below 0.23 SOL threshold)")
+                continue
+
             if not token_mint:
                 token_mint = signature
                 print(f"⚠️ Could not resolve mint. Using Sig: {token_mint}")
@@ -299,7 +400,22 @@ async def process_feed():
                 "time": time.strftime("%H:%M:%S"),
                 "status": "ANALYZING..." 
             })
-            
+
+            # Check if we already have a position for this token (Optimization)
+            if paper_trader:
+                for pos in paper_trader.positions.values():
+                    if pos["token_mint"] == str(token_mint):
+                        print(f"⏩ Skipping analysis for {token_mint[:8]} (Already in positions)")
+                        await service.broadcast({
+                            "type": "update",
+                            "signature": signature,
+                            "token": str(token_mint),
+                            "status": "ALREADY_ACTIVE",
+                            "score": 0,
+                            "risk_msg": "Token already in active positions"
+                        })
+                        continue
+
             # 2. Risk Check (SKIP if we only have the signature)
             if len(str(token_mint)) == 44:
                 is_safe, risk_msg = await risk_engine.check_token_safety(token_mint)
@@ -307,8 +423,15 @@ async def process_feed():
                 is_safe, risk_msg = False, "Incomplete data (Resolution failed)"
             
             if is_safe:
+                print(f"✅ Risk Check Passed: {token_mint[:8]}")
                 # 3. Analyze (Fetch Market Data First)
                 market_data = await paper_trader.engine.get_token_price(token_mint)
+                
+                if not market_data:
+                    print(f"⚠️ Failed to fetch market data for {token_mint}. Skipping analysis.")
+                    continue
+                
+                print(f"📉 Market Data Fetched: {token_mint[:8]} | Liq: {market_data.get('liquidity_usd', 'N/A')}")
                 market_data["token"] = token_mint
                 
                 analysis = analyzer.score_token(market_data)
@@ -324,7 +447,10 @@ async def process_feed():
                     "token": str(token_mint),
                     "status": "BUY_SIGNAL" if analysis["verdict"] == "BUY" else "WATCH",
                     "score": analysis["score"],
-                    "risk_msg": f"{analysis.get('risk_msg', '')} | Vol: {vol_str} | Liq: {liq_str}"
+                    "risk_msg": f"{analysis.get('risk_msg', '')} | Vol: {vol_str} | Liq: {liq_str}",
+                    "image_url": market_data.get("image_url", ""),
+                    "websites": market_data.get("websites", []),
+                    "socials": market_data.get("socials", [])
                 })
                 
                 if analysis["verdict"] == "BUY":
@@ -334,6 +460,13 @@ async def process_feed():
                     fdv = market_data.get("fdv", 0)
                     pair_addr = market_data.get("pair_address", "")
                     
+                    # Calculate buy amount based on settings
+                    import random
+                    sol_min = service.settings.get("sol_amount_min", 0.1)
+                    sol_max = service.settings.get("sol_amount_max", 0.5)
+                    sol_to_spend = random.uniform(sol_min, sol_max)
+                    amount_tokens = sol_to_spend / price_sol  # Calculate token amount
+                    
                     try:
                         # 1. Execute Snipe (Simulated/Simultaneous)
                         try:
@@ -342,21 +475,24 @@ async def process_feed():
                             print(f"⚠️ Sniper Net Error (Ignored for Paper Trade): {e}")
 
                         # 2. Open Paper Position
-                        await paper_trader.open_position(signature, token_id, price_sol, 1000, fdv, pair_addr)
+                        await paper_trader.open_position(signature, token_id, price_sol, amount_tokens, fdv, pair_addr)
                         
                         await service.broadcast({
                             "type": "snipe",
-                            "msg": f"🔫 PAPER BUY: {token_id[:8]}... @ {price_sol:.6f} SOL (MCap: ${fdv:,.0f})"
+                            "msg": f"🔫 PAPER BUY: {token_id[:8]}... @ {price_sol:.6f} SOL ({sol_to_spend:.4f} SOL / MCap: ${fdv:,.0f})"
                         })
                     except Exception as e:
                         print(f"⚠️ Trade Execution Failed: {e}")
             else:
-                await service.broadcast({
-                    "type": "update",
-                    "signature": signature,
-                    "status": "HIGH_RISK",
-                    "risk_msg": f"⚠️ {risk_msg}"
-                })
+                # Don't broadcast "Mint Account Not Found" - it's too noisy and usually just means
+                # the token is very new or the transaction doesn't involve a token mint
+                if "Mint Account Not Found" not in risk_msg:
+                    await service.broadcast({
+                        "type": "update",
+                        "signature": signature,
+                        "status": "HIGH_RISK",
+                        "risk_msg": f"⚠️ {risk_msg}"
+                    })
 
         service.queue.task_done()
 
@@ -366,6 +502,20 @@ async def get():
     file_path = os.path.join(base_dir, "static/index.html")
     with open(file_path, "r", encoding="utf-8") as f:
         return HTMLResponse(content=f.read())
+
+@app.get("/history")
+async def get_history_page():
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    file_path = os.path.join(base_dir, "static/history.html")
+    with open(file_path, "r", encoding="utf-8") as f:
+        return HTMLResponse(content=f.read())
+
+@app.get("/api/history")
+async def get_history_api():
+    """Returns closed trade history"""
+    if paper_trader:
+        return paper_trader.closed_positions
+    return []
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
