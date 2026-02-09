@@ -5,7 +5,7 @@ class Analyzer:
     def __init__(self):
         self.min_velocity = 50  # Minimum tx per minute to consider "active"
 
-    def score_token(self, token_data):
+    def score_token(self, token_data, score_boost=0):
         """
         Scoring Logic (Growth & Popularity):
         - Volume Score (0-50): Based on 5m volume (Target $10k+)
@@ -44,6 +44,9 @@ class Analyzer:
         elif liq < 4000:
             score -= 100 # Relaxed slightly from 5k
             
+        if score_boost:
+            score += score_boost
+        
         # Verdict Thresholds
         # Require higher score and safe liquidity
         if score >= 50 and liq > 8000:
@@ -64,7 +67,8 @@ class Analyzer:
             "metrics": {
                 "vol_m5": vol_m5,
                 "change_m5": price_change_m5,
-                "liq": liq
+                "liq": liq,
+                "score_boost": score_boost
             },
             "risk_msg": " ".join(analysis_note) if analysis_note else "Waiting for volume..."
         }

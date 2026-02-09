@@ -1,0 +1,1296 @@
+{
+  "schema_version": 1,
+  "updated_at": 1770658425.3401423,
+  "trades": [
+    {
+      "token": "FWoGHCM8zuhokprtmEA1bHdxJALt2R5bE5KzKA5PUALQ",
+      "entry_price": 1.779e-07,
+      "exit_price": 5.717e-07,
+      "pnl": 1.0166416463921242,
+      "pnl_pct": 221.36031478358626,
+      "close_reason": "TAKE_PROFIT",
+      "close_time": 1770642968.0639648,
+      "duration": 73.39424419403076,
+      "entry_sol_amount": 0.45927005813397387,
+      "pair_address": "9N17ECbfpvuoJkrL88VXJSJz8fbxwLTWnEKg2CKeFoYM",
+      "kol_signals": [
+        {
+          "wallet": "2fg5QD1eD7rzNNCsvnhmXFm5hqNgwTTG8p7kQ6f3rx6f",
+          "label": "Cupsy Bundle",
+          "timestamp": 1770642894.6697206
+        },
+        {
+          "wallet": "7NAd2EpYGGeFofpyvgehSXhH5vg6Ry6VRMW2Y6jiqCu1",
+          "label": "Cupsy Public",
+          "timestamp": 1770642894.8017926
+        }
+      ],
+      "ath_during_trade": {
+        "price_sol": 5.717e-07,
+        "fdv": 0.0,
+        "timestamp": 1770642968.0639648,
+        "pnl_pct_at_ath": 221.36031478358626
+      },
+      "token_age_seconds": 946,
+      "creator_twitter": {},
+      "token_mentions": {
+        "count": 0,
+        "timeframe": "24h",
+        "scraped_at": 1770642894.667141
+      },
+      "ath_post_close_72h": {
+        "price_sol": 8.006e-07,
+        "fdv": 0.0,
+        "timestamp": 1770643284.1578257,
+        "potential_pnl_pct": 350.02810567734684,
+        "monitoring_complete": false
+      }
+    },
+    {
+      "token": "EUUdWDEPUUogXYXiZ6CZXsB1cb2y4maTU7kwbyepBAGS",
+      "entry_price": 6.951e-07,
+      "exit_price": 5.08e-07,
+      "pnl": -0.07055501076200335,
+      "pnl_pct": -26.91699036109912,
+      "close_reason": "STOP_LOSS",
+      "close_time": 1770642999.1355922,
+      "duration": 150.8609356880188,
+      "entry_sol_amount": 0.2621207267806977,
+      "pair_address": "BKSLTS4nWefA5tCTvqPeyzexqHoYwSyiF5mSUxVGEK8r",
+      "kol_signals": [
+        {
+          "wallet": "6S8GezkxYUfZy9JPtYnanbcZTMB87Wjt1qx3c6ELajKC",
+          "label": "High Gains",
+          "timestamp": 1770642848.2746565
+        }
+      ],
+      "ath_during_trade": {
+        "price_sol": 8.632e-07,
+        "fdv": 72961.0,
+        "timestamp": 1770642894.7230422,
+        "pnl_pct_at_ath": 24.183570709250457
+      },
+      "token_age_seconds": 132,
+      "creator_twitter": {},
+      "token_mentions": {
+        "count": 0,
+        "timeframe": "24h",
+        "scraped_at": 1770642848.2713122
+      },
+      "ath_post_close_72h": {
+        "price_sol": 1.297e-06,
+        "fdv": 108600.0,
+        "timestamp": 1770646216.359544,
+        "potential_pnl_pct": 86.59185728672134,
+        "monitoring_complete": false
+      }
+    },
+    {
+      "token": "HsxcpQ8QNmwHSmmHkqKVbUZaFWBdEwwMNxuSQv7ppump",
+      "entry_price": 4.577e-07,
+      "exit_price": 6.893e-07,
+      "pnl": 0.24086718746490188,
+      "pnl_pct": 50.60083023814727,
+      "close_reason": "TAKE_PROFIT",
+      "close_time": 1770644285.7767723,
+      "duration": 678.548259973526,
+      "entry_sol_amount": 0.47601429923439365,
+      "pair_address": "DAD8hXMie8esW5AdtZSeYxV8voNqyVqVRztUKh8Xu5FV",
+      "kol_signals": [
+        {
+          "wallet": "G4MQZpoLvfRZDTdSbtbMDXf4J8GQ9VGMyzKysLhyfotL",
+          "label": "HoenstDevAlt",
+          "timestamp": 1770643607.2285123
+        }
+      ],
+      "ath_during_trade": {
+        "price_sol": 6.893e-07,
+        "fdv": 58028.0,
+        "timestamp": 1770644285.7767723,
+        "pnl_pct_at_ath": 50.60083023814727
+      },
+      "token_age_seconds": 73,
+      "creator_twitter": {
+        "username": "2020848161531580894",
+        "url": "https://x.com/i/communities/2020848161531580894",
+        "followers": 0,
+        "scraped_at": 1770643575.5071495
+      },
+      "token_mentions": {
+        "count": 0,
+        "timeframe": "24h",
+        "scraped_at": 1770643605.4062183
+      },
+      "ath_post_close_72h": {
+        "price_sol": 2.165e-06,
+        "fdv": 181776.0,
+        "timestamp": 1770645732.629284,
+        "potential_pnl_pct": 373.0172602141141,
+        "monitoring_complete": false
+      }
+    },
+    {
+      "token": "2bQYC4xuB71YFG1ueyYkoWr84ZoYrkCKWfKVnG1abwFc",
+      "entry_price": 8.283e-07,
+      "exit_price": 3.831e-07,
+      "pnl": -0.05663398240627418,
+      "pnl_pct": -53.748641796450556,
+      "close_reason": "STOP_LOSS",
+      "close_time": 1770646105.848494,
+      "duration": 71.71831393241882,
+      "entry_sol_amount": 0.10536821120196968,
+      "pair_address": "BWcXvtDLBDvK87QUsYdn91VJ6mX4zt6Gdc6jT7mxaPhL",
+      "kol_signals": [
+        {
+          "wallet": "bwamJzztZsepfkteWRChggmXuiiCQvpLqPietdNfSXa",
+          "label": "55k Devs",
+          "timestamp": 1770646034.1301801
+        },
+        {
+          "wallet": "3LUfv2u5yzsDtUzPdsSJ7ygPBuqwfycMkjpNreRR2Yww",
+          "label": "Domy",
+          "timestamp": 1770646057.1541655
+        }
+      ],
+      "ath_during_trade": {
+        "price_sol": 8.283e-07,
+        "fdv": 69275.0,
+        "timestamp": 1770646034.1301801,
+        "pnl_pct_at_ath": 0.0
+      },
+      "token_age_seconds": 28,
+      "creator_twitter": {},
+      "token_mentions": {
+        "count": 0,
+        "timeframe": "24h",
+        "scraped_at": 1770646034.1281078
+      },
+      "ath_post_close_72h": {
+        "price_sol": 6.649e-07,
+        "fdv": 55632.0,
+        "timestamp": 1770646154.802659,
+        "potential_pnl_pct": -19.727151998068333,
+        "monitoring_complete": false
+      }
+    },
+    {
+      "token": "HsxcpQ8QNmwHSmmHkqKVbUZaFWBdEwwMNxuSQv7ppump",
+      "entry_price": 2.17e-06,
+      "exit_price": 1.729e-06,
+      "pnl": -0.06445188883233124,
+      "pnl_pct": -20.322580645161285,
+      "close_reason": "STOP_LOSS",
+      "close_time": 1770646154.9230392,
+      "duration": 396.02267837524414,
+      "entry_sol_amount": 0.31714421488924904,
+      "pair_address": "DAD8hXMie8esW5AdtZSeYxV8voNqyVqVRztUKh8Xu5FV",
+      "kol_signals": [
+        {
+          "wallet": "G4MQZpoLvfRZDTdSbtbMDXf4J8GQ9VGMyzKysLhyfotL",
+          "label": "HoenstDevAlt",
+          "timestamp": 1770645758.9003608
+        }
+      ],
+      "ath_during_trade": {
+        "price_sol": 2.197e-06,
+        "fdv": 184386.0,
+        "timestamp": 1770645875.0373755,
+        "pnl_pct_at_ath": 1.2442396313364015
+      },
+      "token_age_seconds": 2252,
+      "creator_twitter": {
+        "username": "2020848161531580894",
+        "url": "https://x.com/i/communities/2020848161531580894",
+        "followers": 0,
+        "scraped_at": 1770645754.7246406
+      },
+      "token_mentions": {
+        "count": 0,
+        "timeframe": "24h",
+        "scraped_at": 1770645758.3596597
+      },
+      "ath_post_close_72h": {
+        "price_sol": 2.091e-06,
+        "fdv": 178703.0,
+        "timestamp": 1770649436.7878962,
+        "potential_pnl_pct": -3.6405529953917055,
+        "monitoring_complete": false
+      }
+    },
+    {
+      "token": "7H53TALvj8C7saMpmRed3suLrtsKRJJTwyyLRFrkBAGS",
+      "entry_price": 6.114e-07,
+      "exit_price": 4.736e-07,
+      "pnl": -0.07894072247930238,
+      "pnl_pct": -22.538436375531564,
+      "close_reason": "STOP_LOSS",
+      "close_time": 1770646195.3460596,
+      "duration": 644.4665186405182,
+      "entry_sol_amount": 0.3502493303617234,
+      "pair_address": "64k5Zz14YnDDNFRoNLTVuBytsCNnAxx4a8tfZvKk7eC7",
+      "kol_signals": [
+        {
+          "wallet": "6S8GezkxYUfZy9JPtYnanbcZTMB87Wjt1qx3c6ELajKC",
+          "label": "High Gains",
+          "timestamp": 1770645550.879541
+        }
+      ],
+      "ath_during_trade": {
+        "price_sol": 8.986e-07,
+        "fdv": 75323.0,
+        "timestamp": 1770645977.709731,
+        "pnl_pct_at_ath": 46.9741576709192
+      },
+      "token_age_seconds": 83,
+      "creator_twitter": {
+        "username": "2020839623610798525",
+        "url": "https://x.com/i/communities/2020839623610798525",
+        "followers": 0,
+        "scraped_at": 1770645520.089193
+      },
+      "token_mentions": {
+        "count": 0,
+        "timeframe": "24h",
+        "scraped_at": 1770645550.879541
+      },
+      "ath_post_close_72h": {
+        "price_sol": 2.108e-06,
+        "fdv": 182198.0,
+        "timestamp": 1770658251.8795388,
+        "potential_pnl_pct": 244.78246647039583,
+        "monitoring_complete": false
+      }
+    },
+    {
+      "token": "7SYuU1Z6EKfpYQQ9VeTXfLW5ofhigdn8Y7iQsqoepump",
+      "entry_price": 1.027e-06,
+      "exit_price": 1.605e-06,
+      "pnl": 0.20611958458147778,
+      "pnl_pct": 56.28042843232717,
+      "close_reason": "TAKE_PROFIT",
+      "close_time": 1770646507.8713923,
+      "duration": 56.750805616378784,
+      "entry_sol_amount": 0.3662367013238368,
+      "pair_address": "9y3WyW7Jidoj3J5XVS12XWGVBB8iDXaND1eFhYVeZj4N",
+      "kol_signals": [
+        {
+          "wallet": "6S8GezkxYUfZy9JPtYnanbcZTMB87Wjt1qx3c6ELajKC",
+          "label": "High Gains",
+          "timestamp": 1770646451.1205866
+        }
+      ],
+      "ath_during_trade": {
+        "price_sol": 1.605e-06,
+        "fdv": 134489.0,
+        "timestamp": 1770646507.8713923,
+        "pnl_pct_at_ath": 56.28042843232717
+      },
+      "token_age_seconds": 123,
+      "creator_twitter": {},
+      "token_mentions": {
+        "count": 0,
+        "timeframe": "24h",
+        "scraped_at": 1770646450.6613488
+      },
+      "ath_post_close_72h": {
+        "price_sol": 1.546e-05,
+        "fdv": 1325424.0,
+        "timestamp": 1770649619.6956356,
+        "potential_pnl_pct": 1405.3554040895813,
+        "monitoring_complete": false
+      }
+    },
+    {
+      "token": "7SYuU1Z6EKfpYQQ9VeTXfLW5ofhigdn8Y7iQsqoepump",
+      "entry_price": 5.23e-06,
+      "exit_price": 4.133e-06,
+      "pnl": -0.0672381037419485,
+      "pnl_pct": -20.975143403441677,
+      "close_reason": "STOP_LOSS",
+      "close_time": 1770648213.3910785,
+      "duration": 473.7958264350891,
+      "entry_sol_amount": 0.3205608774570562,
+      "pair_address": "9y3WyW7Jidoj3J5XVS12XWGVBB8iDXaND1eFhYVeZj4N",
+      "kol_signals": [
+        {
+          "wallet": "6S8GezkxYUfZy9JPtYnanbcZTMB87Wjt1qx3c6ELajKC",
+          "label": "High Gains",
+          "timestamp": 1770647739.595252
+        }
+      ],
+      "ath_during_trade": {
+        "price_sol": 5.773e-06,
+        "fdv": 482855.0,
+        "timestamp": 1770647806.1292624,
+        "pnl_pct_at_ath": 10.382409177820263
+      },
+      "token_age_seconds": 1412,
+      "creator_twitter": {
+        "username": "2020863410175357377",
+        "url": "https://x.com/i/communities/2020863410175357377",
+        "followers": 0,
+        "scraped_at": 1770647735.7037082
+      },
+      "token_mentions": {
+        "count": 0,
+        "timeframe": "24h",
+        "scraped_at": 1770647739.579788
+      },
+      "ath_post_close_72h": {
+        "price_sol": 1.546e-05,
+        "fdv": 1325424.0,
+        "timestamp": 1770649619.6956356,
+        "potential_pnl_pct": 195.60229445506695,
+        "monitoring_complete": false
+      }
+    },
+    {
+      "token": "HsxcpQ8QNmwHSmmHkqKVbUZaFWBdEwwMNxuSQv7ppump",
+      "entry_price": 1.011e-06,
+      "exit_price": 7.912e-07,
+      "pnl": -0.032622889291047404,
+      "pnl_pct": -21.740850642927782,
+      "close_reason": "STOP_LOSS",
+      "close_time": 1770648261.5969777,
+      "duration": 360.3721647262573,
+      "entry_sol_amount": 0.15005341707574588,
+      "pair_address": "DAD8hXMie8esW5AdtZSeYxV8voNqyVqVRztUKh8Xu5FV",
+      "kol_signals": [
+        {
+          "wallet": "G4MQZpoLvfRZDTdSbtbMDXf4J8GQ9VGMyzKysLhyfotL",
+          "label": "HoenstDevAlt",
+          "timestamp": 1770647901.224813
+        }
+      ],
+      "ath_during_trade": {
+        "price_sol": 1.123e-06,
+        "fdv": 95149.0,
+        "timestamp": 1770648016.8704169,
+        "pnl_pct_at_ath": 11.07814045499507
+      },
+      "token_age_seconds": 4394,
+      "creator_twitter": {
+        "username": "2020848161531580894",
+        "url": "https://x.com/i/communities/2020848161531580894",
+        "followers": 0,
+        "scraped_at": 1770647897.1279202
+      },
+      "token_mentions": {
+        "count": 0,
+        "timeframe": "24h",
+        "scraped_at": 1770647900.6947541
+      },
+      "ath_post_close_72h": {
+        "price_sol": 2.091e-06,
+        "fdv": 178703.0,
+        "timestamp": 1770649436.7878962,
+        "potential_pnl_pct": 106.82492581602374,
+        "monitoring_complete": false
+      }
+    },
+    {
+      "token": "9gDhE4e1pLfcFcQH7RsNJtH5M9uMu3WG7mHhJHkmCXDH",
+      "entry_price": 3.514e-07,
+      "exit_price": 2.486e-07,
+      "pnl": -0.05731070371156345,
+      "pnl_pct": -29.2544109277177,
+      "close_reason": "STOP_LOSS",
+      "close_time": 1770648457.7633293,
+      "duration": 25.991504192352295,
+      "entry_sol_amount": 0.19590448720081124,
+      "pair_address": "B3xKWjm5DPXscWKZXgyKN2K9nGLnszDpCwHHJRJhddwP",
+      "kol_signals": [
+        {
+          "wallet": "2fg5QD1eD7rzNNCsvnhmXFm5hqNgwTTG8p7kQ6f3rx6f",
+          "label": "Cupsy Bundle",
+          "timestamp": 1770648431.771825
+        },
+        {
+          "wallet": "7NAd2EpYGGeFofpyvgehSXhH5vg6Ry6VRMW2Y6jiqCu1",
+          "label": "Cupsy Public",
+          "timestamp": 1770648431.8168995
+        }
+      ],
+      "ath_during_trade": {
+        "price_sol": 3.514e-07,
+        "fdv": 29824.0,
+        "timestamp": 1770648431.771825,
+        "pnl_pct_at_ath": 0.0
+      },
+      "token_age_seconds": 70,
+      "creator_twitter": {},
+      "token_mentions": {
+        "count": 0,
+        "timeframe": "24h",
+        "scraped_at": 1770648431.7690148
+      },
+      "ath_post_close_72h": {
+        "price_sol": 2.732e-07,
+        "fdv": 23356.0,
+        "timestamp": 1770654712.8161402,
+        "potential_pnl_pct": -22.253841775754125,
+        "monitoring_complete": false
+      }
+    },
+    {
+      "token": "HEKYtKZVeVC4CWczFCRofsYyh3VdGbPW9B6kjRx7pump",
+      "entry_price": 3.503e-07,
+      "exit_price": 1.713e-07,
+      "pnl": -0.08068469979196508,
+      "pnl_pct": -51.09905795032829,
+      "close_reason": "STOP_LOSS",
+      "close_time": 1770648752.1581185,
+      "duration": 418.9056975841522,
+      "entry_sol_amount": 0.15789860523533725,
+      "pair_address": "Jau7bmAfQwiN2cg5qR8fMSc1w7mUSXF76CuYEvmMsCo",
+      "kol_signals": [
+        {
+          "wallet": "7NAd2EpYGGeFofpyvgehSXhH5vg6Ry6VRMW2Y6jiqCu1",
+          "label": "Cupsy Public",
+          "timestamp": 1770648333.252421
+        },
+        {
+          "wallet": "2fg5QD1eD7rzNNCsvnhmXFm5hqNgwTTG8p7kQ6f3rx6f",
+          "label": "Cupsy Bundle",
+          "timestamp": 1770648532.6982536
+        }
+      ],
+      "ath_during_trade": {
+        "price_sol": 5.039e-07,
+        "fdv": 42692.0,
+        "timestamp": 1770648338.377073,
+        "pnl_pct_at_ath": 43.84813017413644
+      },
+      "token_age_seconds": 127,
+      "creator_twitter": {
+        "username": "pumpbnkr",
+        "url": "https://x.com/pumpbnkr",
+        "followers": 0,
+        "scraped_at": 1770648304.4374306
+      },
+      "token_mentions": {
+        "count": 0,
+        "timeframe": "24h",
+        "scraped_at": 1770648333.250344
+      },
+      "ath_post_close_72h": {
+        "price_sol": 1.713e-07,
+        "fdv": 14568.0,
+        "timestamp": 1770648752.1581185,
+        "potential_pnl_pct": -51.09905795032829,
+        "monitoring_complete": false
+      }
+    },
+    {
+      "token": "Gf62C3Z9zaghNcq3rvpQArvVt28rTtEaYjfmpsAmpump",
+      "entry_price": 3.222e-07,
+      "exit_price": 8.283e-08,
+      "pnl": -0.28713085421737483,
+      "pnl_pct": -74.29236499068901,
+      "close_reason": "STOP_LOSS",
+      "close_time": 1770648759.7780945,
+      "duration": 11.867994546890259,
+      "entry_sol_amount": 0.3864877020045877,
+      "pair_address": "G9xPSKa1MHLCbsszUB5eMzLKaRAhAQJQ942NB3cRTDdx",
+      "kol_signals": [
+        {
+          "wallet": "7NAd2EpYGGeFofpyvgehSXhH5vg6Ry6VRMW2Y6jiqCu1",
+          "label": "Cupsy Public",
+          "timestamp": 1770648747.9101
+        },
+        {
+          "wallet": "2fg5QD1eD7rzNNCsvnhmXFm5hqNgwTTG8p7kQ6f3rx6f",
+          "label": "Cupsy Bundle",
+          "timestamp": 1770648747.9537542
+        }
+      ],
+      "ath_during_trade": {
+        "price_sol": 3.222e-07,
+        "fdv": 27387.0,
+        "timestamp": 1770648747.9101,
+        "pnl_pct_at_ath": 0.0
+      },
+      "token_age_seconds": 83,
+      "creator_twitter": {},
+      "token_mentions": {
+        "count": 0,
+        "timeframe": "24h",
+        "scraped_at": 1770648747.8934565
+      },
+      "ath_post_close_72h": {
+        "price_sol": 8.283e-08,
+        "fdv": 7045.0,
+        "timestamp": 1770648759.7780945,
+        "potential_pnl_pct": -74.29236499068901,
+        "monitoring_complete": false
+      }
+    },
+    {
+      "token": "ELZuobRsfZLpvjPQDjABjbCxkqZDibW37xRkRyA4pump",
+      "entry_price": 4.357e-07,
+      "exit_price": 2.252e-07,
+      "pnl": -0.12956946534320876,
+      "pnl_pct": -48.313059444571955,
+      "close_reason": "STOP_LOSS",
+      "close_time": 1770649694.677821,
+      "duration": 71.14765071868896,
+      "entry_sol_amount": 0.26818724964387675,
+      "pair_address": "4tCEHjNAvK8Jhm8MGWCPGNFeQ8L7ijasKPam6xMPEaV6",
+      "kol_signals": [
+        {
+          "wallet": "2fg5QD1eD7rzNNCsvnhmXFm5hqNgwTTG8p7kQ6f3rx6f",
+          "label": "Cupsy Bundle",
+          "timestamp": 1770649623.5301702
+        }
+      ],
+      "ath_during_trade": {
+        "price_sol": 4.357e-07,
+        "fdv": 37346.0,
+        "timestamp": 1770649623.5301702,
+        "pnl_pct_at_ath": 0.0
+      },
+      "token_age_seconds": 189,
+      "creator_twitter": {},
+      "token_mentions": {
+        "count": 0,
+        "timeframe": "24h",
+        "scraped_at": 1770649623.5301702
+      },
+      "ath_post_close_72h": {
+        "price_sol": 3.286e-07,
+        "fdv": 27817.0,
+        "timestamp": 1770650549.2965765,
+        "potential_pnl_pct": -24.581133807665825,
+        "monitoring_complete": false
+      }
+    },
+    {
+      "token": "7SYuU1Z6EKfpYQQ9VeTXfLW5ofhigdn8Y7iQsqoepump",
+      "entry_price": 1.39e-05,
+      "exit_price": 1.098e-05,
+      "pnl": -0.04750184778235307,
+      "pnl_pct": -21.00719424460432,
+      "close_reason": "STOP_LOSS",
+      "close_time": 1770650307.8717363,
+      "duration": 1054.92613530159,
+      "entry_sol_amount": 0.22612180964887246,
+      "pair_address": "9y3WyW7Jidoj3J5XVS12XWGVBB8iDXaND1eFhYVeZj4N",
+      "kol_signals": [
+        {
+          "wallet": "6S8GezkxYUfZy9JPtYnanbcZTMB87Wjt1qx3c6ELajKC",
+          "label": "High Gains",
+          "timestamp": 1770649252.945601
+        }
+      ],
+      "ath_during_trade": {
+        "price_sol": 1.754e-05,
+        "fdv": 1502609.0,
+        "timestamp": 1770649623.609675,
+        "pnl_pct_at_ath": 26.187050359712234
+      },
+      "token_age_seconds": 2903,
+      "creator_twitter": {
+        "username": "2020863410175357377",
+        "url": "https://x.com/i/communities/2020863410175357377",
+        "followers": 0,
+        "scraped_at": 1770649226.7712636
+      },
+      "token_mentions": {
+        "count": 0,
+        "timeframe": "24h",
+        "scraped_at": 1770649252.4095373
+      },
+      "ath_post_close_72h": {
+        "price_sol": 1.159e-05,
+        "fdv": 981544.0,
+        "timestamp": 1770650484.3735478,
+        "potential_pnl_pct": -16.61870503597122,
+        "monitoring_complete": false
+      }
+    },
+    {
+      "token": "7SYuU1Z6EKfpYQQ9VeTXfLW5ofhigdn8Y7iQsqoepump",
+      "entry_price": 1.006e-05,
+      "exit_price": 7.863e-06,
+      "pnl": -0.07962578160939891,
+      "pnl_pct": -21.838966202783293,
+      "close_reason": "STOP_LOSS",
+      "close_time": 1770652659.8130097,
+      "duration": 1407.1848950386047,
+      "entry_sol_amount": 0.364604170683001,
+      "pair_address": "9y3WyW7Jidoj3J5XVS12XWGVBB8iDXaND1eFhYVeZj4N",
+      "kol_signals": [
+        {
+          "wallet": "6S8GezkxYUfZy9JPtYnanbcZTMB87Wjt1qx3c6ELajKC",
+          "label": "High Gains",
+          "timestamp": 1770651252.6281147
+        }
+      ],
+      "ath_during_trade": {
+        "price_sol": 1.043e-05,
+        "fdv": 892082.0,
+        "timestamp": 1770651660.070659,
+        "pnl_pct_at_ath": 3.6779324055665987
+      },
+      "token_age_seconds": 4925,
+      "creator_twitter": {
+        "username": "2020863410175357377",
+        "url": "https://x.com/i/communities/2020863410175357377",
+        "followers": 0,
+        "scraped_at": 1770651249.013451
+      },
+      "token_mentions": {
+        "count": 0,
+        "timeframe": "24h",
+        "scraped_at": 1770651252.6271076
+      },
+      "ath_post_close_72h": {
+        "price_sol": 9.346e-06,
+        "fdv": 796013.0,
+        "timestamp": 1770653100.8639498,
+        "potential_pnl_pct": -7.097415506958253,
+        "monitoring_complete": false
+      }
+    },
+    {
+      "token": "Ah7Ku3zC49iBSLVbDkc4FeeWNFRCcmyAhgvRMgpgpump",
+      "entry_price": 4.472e-07,
+      "exit_price": 1.355e-06,
+      "pnl": 0.9475695830566147,
+      "pnl_pct": 202.9964221824687,
+      "close_reason": "TAKE_PROFIT",
+      "close_time": 1770652712.6133888,
+      "duration": 26.619017124176025,
+      "entry_sol_amount": 0.46679127290473454,
+      "pair_address": "AnKGS6XCnHiRsgzmozoJ1KEjzJTVS7e734h65huXcxLy",
+      "kol_signals": [
+        {
+          "wallet": "7NAd2EpYGGeFofpyvgehSXhH5vg6Ry6VRMW2Y6jiqCu1",
+          "label": "Cupsy Public",
+          "timestamp": 1770652685.9943717
+        }
+      ],
+      "ath_during_trade": {
+        "price_sol": 1.355e-06,
+        "fdv": 115624.0,
+        "timestamp": 1770652712.6133888,
+        "pnl_pct_at_ath": 202.9964221824687
+      },
+      "token_age_seconds": 65,
+      "creator_twitter": {},
+      "token_mentions": {
+        "count": 0,
+        "timeframe": "24h",
+        "scraped_at": 1770652685.4794595
+      },
+      "ath_post_close_72h": {
+        "price_sol": 2.191e-06,
+        "fdv": 186133.0,
+        "timestamp": 1770653346.9964194,
+        "potential_pnl_pct": 389.93738819320214,
+        "monitoring_complete": false
+      }
+    },
+    {
+      "token": "4YH1WkSn9EQU6HCLAbjTidMCZ5AoVJqFW64hXQrXpump",
+      "entry_price": 3.028e-07,
+      "exit_price": 5.29e-07,
+      "pnl": 0.13391550724508136,
+      "pnl_pct": 74.70277410832234,
+      "close_reason": "TAKE_PROFIT",
+      "close_time": 1770653625.0801094,
+      "duration": 145.31785011291504,
+      "entry_sol_amount": 0.1792644367542468,
+      "pair_address": "3rPUpTCFdM9w7hMaPVfj7HjPFSRm7vAyGdSYRmojqWHD",
+      "kol_signals": [
+        {
+          "wallet": "2fg5QD1eD7rzNNCsvnhmXFm5hqNgwTTG8p7kQ6f3rx6f",
+          "label": "Cupsy Bundle",
+          "timestamp": 1770653479.7622592
+        },
+        {
+          "wallet": "7NAd2EpYGGeFofpyvgehSXhH5vg6Ry6VRMW2Y6jiqCu1",
+          "label": "Cupsy Public",
+          "timestamp": 1770653479.9395764
+        }
+      ],
+      "ath_during_trade": {
+        "price_sol": 5.29e-07,
+        "fdv": 44929.0,
+        "timestamp": 1770653625.0801094,
+        "pnl_pct_at_ath": 74.70277410832234
+      },
+      "token_age_seconds": 539,
+      "creator_twitter": {},
+      "token_mentions": {
+        "count": 0,
+        "timeframe": "24h",
+        "scraped_at": 1770653479.7602596
+      },
+      "ath_post_close_72h": {
+        "price_sol": 3.41e-06,
+        "fdv": 294840.0,
+        "timestamp": 1770655622.7330391,
+        "potential_pnl_pct": 1026.1558784676356,
+        "monitoring_complete": false
+      }
+    },
+    {
+      "token": "DcQdGTVi3BZnr2abqEKK9QSNBPyv6tfcdwGjDmDtpump",
+      "entry_price": 5.376e-07,
+      "exit_price": 3.084e-07,
+      "pnl": -0.02984375000000001,
+      "pnl_pct": -42.633928571428584,
+      "close_reason": "STOP_LOSS",
+      "close_time": 1770655480.1062934,
+      "duration": 79.11998462677002,
+      "entry_sol_amount": 0.07,
+      "pair_address": "GFMf1bGUWZYgUE8M7JpvA8fkFbWJXWrcw3nRDWsQUFK4",
+      "kol_signals": [
+        {
+          "wallet": "2fg5QD1eD7rzNNCsvnhmXFm5hqNgwTTG8p7kQ6f3rx6f",
+          "label": "Cupsy Bundle",
+          "timestamp": 1770655400.9863088
+        },
+        {
+          "wallet": "7NAd2EpYGGeFofpyvgehSXhH5vg6Ry6VRMW2Y6jiqCu1",
+          "label": "Cupsy Public",
+          "timestamp": 1770655401.062607
+        }
+      ],
+      "ath_during_trade": {
+        "price_sol": 5.376e-07,
+        "fdv": 46125.0,
+        "timestamp": 1770655400.9863088,
+        "pnl_pct_at_ath": 0.0
+      },
+      "token_age_seconds": 391,
+      "creator_twitter": {
+        "username": "2020897429340745872",
+        "url": "https://x.com/i/communities/2020897429340745872",
+        "followers": 0,
+        "scraped_at": 1770655397.5117974
+      },
+      "token_mentions": {
+        "count": 0,
+        "timeframe": "24h",
+        "scraped_at": 1770655400.9863088
+      },
+      "ath_post_close_72h": {
+        "price_sol": 3.991e-07,
+        "fdv": 34446.0,
+        "timestamp": 1770655576.0454264,
+        "potential_pnl_pct": -25.762648809523814,
+        "monitoring_complete": false
+      }
+    },
+    {
+      "token": "DcQdGTVi3BZnr2abqEKK9QSNBPyv6tfcdwGjDmDtpump",
+      "entry_price": 5.376e-07,
+      "exit_price": 3.084e-07,
+      "pnl": -0.02984375000000001,
+      "pnl_pct": -42.633928571428584,
+      "close_reason": "STOP_LOSS",
+      "close_time": 1770655480.4605489,
+      "duration": 81.27217936515808,
+      "entry_sol_amount": 0.07,
+      "pair_address": "GFMf1bGUWZYgUE8M7JpvA8fkFbWJXWrcw3nRDWsQUFK4",
+      "kol_signals": [
+        {
+          "wallet": "7NAd2EpYGGeFofpyvgehSXhH5vg6Ry6VRMW2Y6jiqCu1",
+          "label": "Cupsy Public",
+          "timestamp": 1770655399.1883695
+        },
+        {
+          "wallet": "2fg5QD1eD7rzNNCsvnhmXFm5hqNgwTTG8p7kQ6f3rx6f",
+          "label": "Cupsy Bundle",
+          "timestamp": 1770655399.3363185
+        }
+      ],
+      "ath_during_trade": {
+        "price_sol": 5.376e-07,
+        "fdv": 46125.0,
+        "timestamp": 1770655399.1883695,
+        "pnl_pct_at_ath": 0.0
+      },
+      "token_age_seconds": 388,
+      "creator_twitter": {
+        "username": "2020897429340745872",
+        "url": "https://x.com/i/communities/2020897429340745872",
+        "followers": 0,
+        "scraped_at": 1770655395.1747007
+      },
+      "token_mentions": {
+        "count": 0,
+        "timeframe": "24h",
+        "scraped_at": 1770655398.6360152
+      },
+      "holder_intel": {
+        "top10_holding_pct": 42.69,
+        "snipers_holding_pct": 0.0,
+        "bundlers_holding_pct": 0.0,
+        "sniper_wallet_count": 0,
+        "bundler_wallet_count": 0,
+        "total_supply": 999990995.459088,
+        "source": "geckoterminal+rpc_heuristic",
+        "calculated_at": 1770655394.686339,
+        "latency_sec": 0.524
+      },
+      "candle_signals": {
+        "score_adjustment": 0,
+        "reason": "insufficient_candles"
+      },
+      "ath_post_close_72h": {
+        "price_sol": 3.991e-07,
+        "fdv": 34446.0,
+        "timestamp": 1770655561.4695761,
+        "potential_pnl_pct": -25.762648809523814,
+        "monitoring_complete": false
+      }
+    },
+    {
+      "token": "ACthiNPArGdrocAzdjpESsDs4WWTG7peuX6JQcDDpump",
+      "entry_price": 2.869e-07,
+      "exit_price": 1.68e-07,
+      "pnl": -0.029010108051585923,
+      "pnl_pct": -41.443011502265605,
+      "close_reason": "STOP_LOSS",
+      "close_time": 1770656156.0109606,
+      "duration": 90.30094599723816,
+      "entry_sol_amount": 0.07,
+      "pair_address": "Ajib999AZggHK77hXDpvvhS9ewtQwbjV944KnfYb5dsQ",
+      "kol_signals": [
+        {
+          "wallet": "7NAd2EpYGGeFofpyvgehSXhH5vg6Ry6VRMW2Y6jiqCu1",
+          "label": "Cupsy Public",
+          "timestamp": 1770656065.7100146
+        },
+        {
+          "wallet": "2fg5QD1eD7rzNNCsvnhmXFm5hqNgwTTG8p7kQ6f3rx6f",
+          "label": "Cupsy Bundle",
+          "timestamp": 1770656065.8926125
+        }
+      ],
+      "ath_during_trade": {
+        "price_sol": 2.869e-07,
+        "fdv": 24723.0,
+        "timestamp": 1770656065.7100146,
+        "pnl_pct_at_ath": 0.0
+      },
+      "token_age_seconds": 131,
+      "creator_twitter": {},
+      "token_mentions": {
+        "count": 0,
+        "timeframe": "24h",
+        "scraped_at": 1770656058.5574405
+      },
+      "holder_intel": {
+        "top10_holding_pct": 46.19,
+        "snipers_holding_pct": 0.0,
+        "bundlers_holding_pct": 0.0,
+        "sniper_wallet_count": 0,
+        "bundler_wallet_count": 0,
+        "total_supply": 999999927.18731,
+        "source": "geckoterminal+rpc_heuristic",
+        "calculated_at": 1770656058.170325,
+        "latency_sec": 0.626
+      },
+      "candle_signals": {
+        "score_adjustment": 0,
+        "reason": "insufficient_candles"
+      },
+      "ath_post_close_72h": {
+        "price_sol": 2.744e-07,
+        "fdv": 23687.0,
+        "timestamp": 1770656232.5295076,
+        "potential_pnl_pct": -4.356918787033805,
+        "monitoring_complete": false
+      }
+    },
+    {
+      "token": "H4YpZZPtyGvqLCs7N5W5gm9HX4jhm5jVjEP8kQYrpump",
+      "entry_price": 6.035e-07,
+      "exit_price": 4.008e-07,
+      "pnl": -0.02351118475559238,
+      "pnl_pct": -33.5874067937034,
+      "close_reason": "STOP_LOSS",
+      "close_time": 1770656156.0109606,
+      "duration": 70.08939528465271,
+      "entry_sol_amount": 0.07,
+      "pair_address": "D3W1cJwGmQHcfrZDrrxe11CUTMac4rzmbq3voxC2Ze1Y",
+      "kol_signals": [
+        {
+          "wallet": "G4MQZpoLvfRZDTdSbtbMDXf4J8GQ9VGMyzKysLhyfotL",
+          "label": "HoenstDevAlt",
+          "timestamp": 1770656085.9215653
+        }
+      ],
+      "ath_during_trade": {
+        "price_sol": 6.035e-07,
+        "fdv": 52011.0,
+        "timestamp": 1770656085.9215653,
+        "pnl_pct_at_ath": 0.0
+      },
+      "token_age_seconds": 375,
+      "creator_twitter": {},
+      "token_mentions": {
+        "count": 0,
+        "timeframe": "24h",
+        "scraped_at": 1770656078.7186947
+      },
+      "holder_intel": {
+        "top10_holding_pct": 29.53,
+        "snipers_holding_pct": 0.0,
+        "bundlers_holding_pct": 0.0,
+        "sniper_wallet_count": 0,
+        "bundler_wallet_count": 0,
+        "total_supply": 999999999.999998,
+        "source": "geckoterminal+rpc_heuristic",
+        "calculated_at": 1770656078.3262503,
+        "latency_sec": 0.783
+      },
+      "candle_signals": {
+        "score_adjustment": 0,
+        "reason": "insufficient_candles"
+      },
+      "ath_post_close_72h": {
+        "price_sol": 9.115e-07,
+        "fdv": 78623.0,
+        "timestamp": 1770656750.1474175,
+        "potential_pnl_pct": 51.03562551781275,
+        "monitoring_complete": false
+      }
+    },
+    {
+      "token": "561XxnuBCvPdoJC1a7zJDuBqqcQwZ2rEsaAd1eM1pump",
+      "entry_price": 9.869e-07,
+      "exit_price": 7.674e-07,
+      "pnl": -0.015568953288073773,
+      "pnl_pct": -22.24136184010539,
+      "close_reason": "STOP_LOSS",
+      "close_time": 1770656356.1095176,
+      "duration": 80.46398210525513,
+      "entry_sol_amount": 0.07,
+      "pair_address": "G7JLSdTN8eu2nJF2ty89WLr91jJr8wFcwa6R7EdCmqgY",
+      "kol_signals": [
+        {
+          "wallet": "CyaE1VxvBrahnPWkqm5VsdCvyS2QmNht2UFrKJHga54o",
+          "label": "Cented",
+          "timestamp": 1770656275.6455355
+        }
+      ],
+      "ath_during_trade": {
+        "price_sol": 9.869e-07,
+        "fdv": 85161.0,
+        "timestamp": 1770656275.6455355,
+        "pnl_pct_at_ath": 0.0
+      },
+      "token_age_seconds": 130273,
+      "creator_twitter": {
+        "username": "2020357421542371672",
+        "url": "https://x.com/i/communities/2020357421542371672",
+        "followers": 0,
+        "scraped_at": 1770656275.4293418
+      },
+      "token_mentions": {
+        "count": 0,
+        "timeframe": "24h",
+        "scraped_at": 1770656275.6232827
+      },
+      "holder_intel": {
+        "top10_holding_pct": 33.98,
+        "snipers_holding_pct": 0.0,
+        "bundlers_holding_pct": 0.0,
+        "sniper_wallet_count": 0,
+        "bundler_wallet_count": 0,
+        "total_supply": 999998146.94317,
+        "source": "geckoterminal+rpc_heuristic",
+        "calculated_at": 1770656275.1240187,
+        "latency_sec": 0.682
+      },
+      "candle_signals": {
+        "score_adjustment": 0,
+        "reason": "insufficient_candles"
+      },
+      "ath_post_close_72h": {
+        "price_sol": 8.176e-07,
+        "fdv": 70408.0,
+        "timestamp": 1770656479.5793283,
+        "potential_pnl_pct": -17.154726922687203,
+        "monitoring_complete": false
+      }
+    },
+    {
+      "token": "561XxnuBCvPdoJC1a7zJDuBqqcQwZ2rEsaAd1eM1pump",
+      "entry_price": 9.869e-07,
+      "exit_price": 7.674e-07,
+      "pnl": -0.015568953288073773,
+      "pnl_pct": -22.24136184010539,
+      "close_reason": "STOP_LOSS",
+      "close_time": 1770656355.8238516,
+      "duration": 80.38181042671204,
+      "entry_sol_amount": 0.07,
+      "pair_address": "G7JLSdTN8eu2nJF2ty89WLr91jJr8wFcwa6R7EdCmqgY",
+      "kol_signals": [
+        {
+          "wallet": "CyaE1VxvBrahnPWkqm5VsdCvyS2QmNht2UFrKJHga54o",
+          "label": "Cented",
+          "timestamp": 1770656275.4420412
+        }
+      ],
+      "ath_during_trade": {
+        "price_sol": 9.869e-07,
+        "fdv": 85161.0,
+        "timestamp": 1770656275.4420412,
+        "pnl_pct_at_ath": 0.0
+      },
+      "token_age_seconds": 130273,
+      "creator_twitter": {
+        "username": "2020357421542371672",
+        "url": "https://x.com/i/communities/2020357421542371672",
+        "followers": 0,
+        "scraped_at": 1770656275.4420412
+      },
+      "token_mentions": {
+        "count": 0,
+        "timeframe": "24h",
+        "scraped_at": 1770656275.4420412
+      },
+      "holder_intel": {
+        "top10_holding_pct": 33.98,
+        "snipers_holding_pct": 0.0,
+        "bundlers_holding_pct": 0.0,
+        "sniper_wallet_count": 0,
+        "bundler_wallet_count": 0,
+        "total_supply": 999998146.94317,
+        "source": "geckoterminal+rpc_heuristic",
+        "calculated_at": 1770656275.1440246,
+        "latency_sec": 0.688
+      },
+      "candle_signals": {
+        "score_adjustment": 0,
+        "reason": "insufficient_candles"
+      },
+      "ath_post_close_72h": {
+        "price_sol": 8.189e-07,
+        "fdv": 70663.0,
+        "timestamp": 1770658189.8442118,
+        "potential_pnl_pct": -17.023001317256057,
+        "monitoring_complete": false
+      }
+    },
+    {
+      "token": "2xJymZMCtGy3HooZmBtJ8S9KjPymNz1ERXNQZkC6pump",
+      "entry_price": 9.336e-07,
+      "exit_price": 5.162e-07,
+      "pnl": -0.03129605826906598,
+      "pnl_pct": -44.70865467009426,
+      "close_reason": "STOP_LOSS",
+      "close_time": 1770657593.009135,
+      "duration": 107.07996916770935,
+      "entry_sol_amount": 0.07,
+      "pair_address": "8EFqCNgf7X1Ld3LvHbxqmyB9fqk1JVoZNghkpYsQZrk8",
+      "kol_signals": [
+        {
+          "wallet": "CyaE1VxvBrahnPWkqm5VsdCvyS2QmNht2UFrKJHga54o",
+          "label": "Cented",
+          "timestamp": 1770657485.9291658
+        }
+      ],
+      "ath_during_trade": {
+        "price_sol": 9.336e-07,
+        "fdv": 80326.0,
+        "timestamp": 1770657485.9291658,
+        "pnl_pct_at_ath": 0.0
+      },
+      "token_age_seconds": 0,
+      "creator_twitter": {},
+      "token_mentions": {
+        "count": 0,
+        "timeframe": "24h",
+        "scraped_at": 1770657485.9291658
+      },
+      "holder_intel": {
+        "top10_holding_pct": 49.49,
+        "snipers_holding_pct": 0.0,
+        "bundlers_holding_pct": 0.0,
+        "sniper_wallet_count": 0,
+        "bundler_wallet_count": 0,
+        "total_supply": 999999447.688135,
+        "source": "geckoterminal+rpc_heuristic",
+        "calculated_at": 1770657485.6185849,
+        "latency_sec": 2.13
+      },
+      "candle_signals": {
+        "score_adjustment": 0,
+        "reason": "insufficient_candles"
+      },
+      "ath_post_close_72h": {
+        "price_sol": 5.958e-07,
+        "fdv": 51314.0,
+        "timestamp": 1770658065.8735702,
+        "potential_pnl_pct": -36.18251928020566,
+        "monitoring_complete": false
+      }
+    },
+    {
+      "token": "HsxcpQ8QNmwHSmmHkqKVbUZaFWBdEwwMNxuSQv7ppump",
+      "entry_price": 5.952e-07,
+      "exit_price": 9.675e-07,
+      "pnl": 0.14464703288645805,
+      "pnl_pct": 62.55040322580645,
+      "close_reason": "TAKE_PROFIT",
+      "close_time": 1770657707.5749846,
+      "duration": 3338.481265068054,
+      "entry_sol_amount": 0.231248761681493,
+      "pair_address": "DAD8hXMie8esW5AdtZSeYxV8voNqyVqVRztUKh8Xu5FV",
+      "kol_signals": [
+        {
+          "wallet": "G4MQZpoLvfRZDTdSbtbMDXf4J8GQ9VGMyzKysLhyfotL",
+          "label": "HoenstDevAlt",
+          "timestamp": 1770654369.0937195
+        }
+      ],
+      "ath_during_trade": {
+        "price_sol": 9.675e-07,
+        "fdv": 83372.0,
+        "timestamp": 1770657707.5749846,
+        "pnl_pct_at_ath": 62.55040322580645
+      },
+      "token_age_seconds": 10863,
+      "creator_twitter": {
+        "username": "2020848161531580894",
+        "url": "https://x.com/i/communities/2020848161531580894",
+        "followers": 0,
+        "scraped_at": 1770654365.6953862
+      },
+      "token_mentions": {
+        "count": 0,
+        "timeframe": "24h",
+        "scraped_at": 1770654369.0897443
+      },
+      "holder_intel": {},
+      "candle_signals": {},
+      "ath_post_close_72h": {
+        "price_sol": 9.675e-07,
+        "fdv": 83372.0,
+        "timestamp": 1770657707.5749846,
+        "potential_pnl_pct": 62.55040322580645,
+        "monitoring_complete": false
+      }
+    },
+    {
+      "token": "5TDiD5Fw3DmkshqyiZHj6S4jNc2dG19E7s6gKLuJ2yeV",
+      "entry_price": 2.582e-07,
+      "exit_price": 1.514e-07,
+      "pnl": -0.028954298993028666,
+      "pnl_pct": -41.363284275755234,
+      "close_reason": "STOP_LOSS",
+      "close_time": 1770657736.6829722,
+      "duration": 120.01758217811584,
+      "entry_sol_amount": 0.07,
+      "pair_address": "8vaDjZC7Afm5aCDdBGKnHJ1V1yCrfHxwYvkraVV58fpX",
+      "kol_signals": [
+        {
+          "wallet": "G6fUXjMKPJzCY1rveAE6Qm7wy5U3vZgKDJmN1VPAdiZC",
+          "label": "Clukz",
+          "timestamp": 1770657616.66539
+        }
+      ],
+      "ath_during_trade": {
+        "price_sol": 2.807e-07,
+        "fdv": 24192.0,
+        "timestamp": 1770657679.4013636,
+        "pnl_pct_at_ath": 8.714175058094497
+      },
+      "token_age_seconds": 144,
+      "creator_twitter": {},
+      "token_mentions": {
+        "count": 0,
+        "timeframe": "24h",
+        "scraped_at": 1770657616.66539
+      },
+      "holder_intel": {
+        "top10_holding_pct": 44.51,
+        "snipers_holding_pct": 0.0,
+        "bundlers_holding_pct": 0.0,
+        "sniper_wallet_count": 0,
+        "bundler_wallet_count": 0,
+        "total_supply": 999999857.612442,
+        "source": "geckoterminal+rpc_heuristic",
+        "calculated_at": 1770657616.3877442,
+        "latency_sec": 0.608
+      },
+      "candle_signals": {
+        "score_adjustment": 0,
+        "reason": "insufficient_candles"
+      },
+      "ath_post_close_72h": {
+        "price_sol": 1.838e-07,
+        "fdv": 15862.0,
+        "timestamp": 1770657790.3845332,
+        "potential_pnl_pct": -28.814872192099156,
+        "monitoring_complete": false
+      }
+    },
+    {
+      "token": "7SYuU1Z6EKfpYQQ9VeTXfLW5ofhigdn8Y7iQsqoepump",
+      "entry_price": 5.919e-06,
+      "exit_price": 4.631e-06,
+      "pnl": -0.015232302753843558,
+      "pnl_pct": -21.760432505490794,
+      "close_reason": "STOP_LOSS",
+      "close_time": 1770658380.0442495,
+      "duration": 1723.0747401714325,
+      "entry_sol_amount": 0.07,
+      "pair_address": "9y3WyW7Jidoj3J5XVS12XWGVBB8iDXaND1eFhYVeZj4N",
+      "kol_signals": [
+        {
+          "wallet": "GUDP1dP2C4S3M6dYrSXMFPumWg1Gt1s1N1FqAThsiXWZ",
+          "label": "HonestDevAlt1",
+          "timestamp": 1770656656.9695094
+        }
+      ],
+      "ath_during_trade": {
+        "price_sol": 6.153e-06,
+        "fdv": 530739.0,
+        "timestamp": 1770656736.0827441,
+        "pnl_pct_at_ath": 3.9533705017739442
+      },
+      "token_age_seconds": 10333,
+      "creator_twitter": {
+        "username": "2020863410175357377",
+        "url": "https://x.com/i/communities/2020863410175357377",
+        "followers": 0,
+        "scraped_at": 1770656656.968508
+      },
+      "token_mentions": {
+        "count": 0,
+        "timeframe": "24h",
+        "scraped_at": 1770656656.9695094
+      },
+      "holder_intel": {
+        "top10_holding_pct": 29.5,
+        "snipers_holding_pct": 0.0,
+        "bundlers_holding_pct": 0.0,
+        "sniper_wallet_count": 0,
+        "bundler_wallet_count": 0,
+        "total_supply": 999997938.405453,
+        "source": "geckoterminal+rpc_heuristic",
+        "calculated_at": 1770656656.4595156,
+        "latency_sec": 0.667
+      },
+      "candle_signals": {
+        "score_adjustment": 0,
+        "reason": "insufficient_candles"
+      },
+      "ath_post_close_72h": {
+        "price_sol": 4.675e-06,
+        "fdv": 406867.0,
+        "timestamp": 1770658424.345479,
+        "potential_pnl_pct": -21.01706369319142,
+        "monitoring_complete": false
+      }
+    }
+  ]
+}

@@ -1,4 +1,8 @@
 
+import pytest
+
+pytestmark = pytest.mark.skip(reason="Manual integration script; not an automated pytest test.")
+
 import asyncio
 from solana.rpc.async_api import AsyncClient
 from risk_engine import RiskEngine

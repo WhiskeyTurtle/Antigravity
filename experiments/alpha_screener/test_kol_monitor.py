@@ -1,4 +1,8 @@
 
+import pytest
+
+pytestmark = pytest.mark.skip(reason="Manual integration script; not an automated pytest test.")
+
 import asyncio
 from solana.rpc.websocket_api import connect
 from solana.rpc.commitment import Confirmed

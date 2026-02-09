@@ -1,4 +1,8 @@
 
+import pytest
+
+pytestmark = pytest.mark.skip(reason="Manual integration script; not an automated pytest test.")
+
 import aiohttp
 import asyncio
 import socket

@@ -324,6 +324,12 @@
             background: #ff9500;
             color: #000;
         }
+
+        .kol-amount {
+            color: #88d8ff;
+            font-size: 0.78rem;
+            margin-right: 10px;
+        }
     </style>
 </head>
 
@@ -336,10 +342,19 @@
             <button onclick="toggleManager()">Manage KOLs</button>
             <button onclick="toggleSettings()">⚙️ Settings</button>
             <button id="pause-btn" onclick="togglePause()">⏸ PAUSE</button>
+            <button id="amount-toggle-btn" onclick="toggleAmountCurrency()">Amount: SOL</button>
+            <button id="phantom-connect-btn" onclick="connectPhantom()">Connect Phantom</button>
+            <button id="live-trade-btn" onclick="toggleLiveTrading()">Live Trading: OFF</button>
+            <button id="custodial-key-btn" onclick="toggleCustodialKeyModal()">Import Server Key</button>
 
             <div id="pnl-board" style="font-size:0.9rem; color:#888;">
-                PNL: <span id="pnl-val" style="color:#fff">0.00 SOL</span>
+                PAPER PNL: <span id="pnl-val" style="color:#fff">0.00 SOL</span>
                 (<span id="open-pos">0</span> Active)
+            </div>
+
+            <div id="live-pnl-board" style="font-size:0.9rem; color:#888;">
+                LIVE PNL: <span id="live-pnl-val" style="color:#fff">0.00 SOL</span>
+                (<span id="live-open-pos">0</span> Open)
             </div>
 
             <div class="status">● LIVE CONNECTED</div>
@@ -389,6 +404,26 @@
     </div>
 
     <!-- Live Trades Panel -->
+    <div id="custodial-key-panel"
+        style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:var(--panel); border:2px solid var(--danger); padding:20px; z-index:1001; min-width:500px;">
+        <h3 style="margin-top:0; color:var(--danger); font-size:1rem;">SERVER CUSTODIAL KEY (HOT WALLET)</h3>
+        <div style="font-size:0.75rem; color:#bbb; margin-bottom:10px;">
+            Key is applied in-memory on the server for autonomous trading. Do not use a primary wallet.
+        </div>
+        <input type="password" id="custodial-private-key" placeholder="Base58 Private Key"
+            style="width:100%; padding:8px; background:var(--bg); border:1px solid var(--dim); color:var(--text); font-family:var(--font); margin-bottom:10px;">
+        <label style="display:flex; align-items:center; gap:8px; font-size:0.8rem; color:#bbb; margin-bottom:12px;">
+            <input type="checkbox" id="custodial-enable" checked>
+            Enable trading immediately
+        </label>
+        <div style="display:flex; gap:10px; justify-content:flex-end;">
+            <button onclick="clearCustodialKey()" style="border-color:var(--danger); color:var(--danger);">Clear Key</button>
+            <button onclick="toggleCustodialKeyModal()" style="background:var(--bg);">Close</button>
+            <button onclick="importCustodialKey()" style="background:var(--accent); color:#000; border-color:var(--accent);">Import Key</button>
+        </div>
+    </div>
+
+    <!-- Live Trades Panel -->
     <div id="trades-panel">
         <h3 style="margin-top:0; color:var(--accent); font-size:1rem; margin-bottom:10px;">📊 ACTIVE POSITIONS</h3>
         <table id="trades-table">
@@ -421,12 +456,227 @@
         <div>> Listening for Raydium V4 Pools...</div>
     </div>
 
+    <script src="https://unpkg.com/@solana/web3.js@1.98.0/lib/index.iife.min.js"></script>
     <script>
         const feed = document.getElementById('feed');
         const logs = document.getElementById('logs');
         const socket = new WebSocket(`ws://${location.host}/ws`);
 
         let isPaused = false;
+        let amountCurrency = localStorage.getItem('amountCurrency') || 'SOL';
+        let solUsd = 0;
+        let phantomPublicKey = null;
+        let liveTradingEnabled = false;
+        let liveBuyAmountSol = 0.10;
+        const executedLiveBuys = new Set();
+        const executedLiveSells = new Set();
+        const SOL_MINT = "So11111111111111111111111111111111111111112";
+
+        async function fetchSolPrice() {
+            try {
+                const res = await fetch('/api/sol-price');
+                const data = await res.json();
+                solUsd = Number(data.usd || 0);
+                renderKOLAmounts();
+            } catch (e) {
+                console.error("Failed to fetch SOL price", e);
+            }
+        }
+
+        function formatKOLAmount(solAmount, side = 'TRADE') {
+            const sol = Number(solAmount || 0);
+            if (sol <= 0) {
+                return `${side} n/a`;
+            }
+            if (amountCurrency === 'USD' && solUsd > 0) {
+                const usd = sol * solUsd;
+                return `${side} ~$${usd.toFixed(2)} (${sol.toFixed(3)} SOL)`;
+            }
+            return `${side} ${sol.toFixed(3)} SOL`;
+        }
+
+        function renderKOLAmounts() {
+            const els = document.querySelectorAll('.kol-amount[data-sol]');
+            els.forEach(el => {
+                const sol = Number(el.getAttribute('data-sol') || 0);
+                const side = el.getAttribute('data-side') || 'TRADE';
+                el.textContent = formatKOLAmount(sol, side);
+            });
+        }
+
+        function toggleAmountCurrency() {
+            amountCurrency = amountCurrency === 'SOL' ? 'USD' : 'SOL';
+            localStorage.setItem('amountCurrency', amountCurrency);
+            const btn = document.getElementById('amount-toggle-btn');
+            if (btn) btn.innerText = `Amount: ${amountCurrency}`;
+            renderKOLAmounts();
+        }
+
+        async function connectPhantom() {
+            try {
+                if (!window.solana || !window.solana.isPhantom) {
+                    alert("Phantom wallet not found. Install Phantom extension first.");
+                    return;
+                }
+                const resp = await window.solana.connect();
+                phantomPublicKey = resp.publicKey.toString();
+                const btn = document.getElementById('phantom-connect-btn');
+                if (btn) btn.innerText = `Phantom: ${phantomPublicKey.substring(0, 4)}...${phantomPublicKey.substring(phantomPublicKey.length - 4)}`;
+                log(`Phantom connected: ${phantomPublicKey.substring(0, 8)}...`);
+            } catch (e) {
+                alert(`Failed to connect Phantom: ${e.message || e}`);
+            }
+        }
+
+        function toggleLiveTrading() {
+            if (window.SERVER_CUSTODIAL_MODE === true) {
+                log("Server custodial mode is active. No Phantom approval needed.");
+                return;
+            }
+            if (!phantomPublicKey) {
+                alert("Connect Phantom first.");
+                return;
+            }
+            liveTradingEnabled = !liveTradingEnabled;
+            const btn = document.getElementById('live-trade-btn');
+            if (btn) btn.innerText = `Live Trading: ${liveTradingEnabled ? 'ON' : 'OFF'}`;
+            if (btn) btn.style.color = liveTradingEnabled ? '#00ff9d' : 'var(--text)';
+            log(`Live trading ${liveTradingEnabled ? 'enabled' : 'disabled'}.`);
+        }
+
+        function base64ToUint8Array(base64) {
+            const binary = atob(base64);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+            return bytes;
+        }
+
+        async function buildSwapTransaction(inputMint, outputMint, amountRaw, slippageBps = 100) {
+            const quoteRes = await fetch('/api/trading/quote', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    input_mint: inputMint,
+                    output_mint: outputMint,
+                    amount: amountRaw,
+                    slippage_bps: slippageBps
+                })
+            });
+            const quoteData = await quoteRes.json();
+            if (!quoteRes.ok || !quoteData) throw new Error(quoteData.error || 'Quote failed');
+
+            const buildRes = await fetch('/api/trading/build-swap', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    quote_response: quoteData,
+                    user_public_key: phantomPublicKey
+                })
+            });
+            const buildData = await buildRes.json();
+            if (!buildRes.ok || !buildData.swapTransaction) throw new Error(buildData.error || 'Swap build failed');
+            return { swapTransaction: buildData.swapTransaction, quoteData };
+        }
+
+        async function signAndSendSwap(base64Tx) {
+            const bytes = base64ToUint8Array(base64Tx);
+            const tx = solanaWeb3.VersionedTransaction.deserialize(bytes);
+            const sendRes = await window.solana.signAndSendTransaction(tx, { maxRetries: 3, skipPreflight: false });
+            return sendRes.signature;
+        }
+
+        async function performSwapWithRetries(inputMint, outputMint, amountRaw) {
+            const slippageTiers = [100, 300, 700];
+            let lastErr = 'unknown swap error';
+            for (const slippage of slippageTiers) {
+                try {
+                    const { swapTransaction, quoteData } = await buildSwapTransaction(inputMint, outputMint, amountRaw, slippage);
+                    const sig = await signAndSendSwap(swapTransaction);
+                    return { sig, quoteData, slippage };
+                } catch (e) {
+                    const msg = String(e && (e.message || e));
+                    lastErr = msg;
+                    const lower = msg.toLowerCase();
+                    if (lower.includes('reject') || lower.includes('denied') || lower.includes('cancel')) {
+                        throw e;
+                    }
+                    log(`Swap retry: slippage ${slippage / 100}% failed (${msg}).`);
+                }
+            }
+            throw new Error(lastErr);
+        }
+
+        async function executeLiveBuy(tokenMint, signalId) {
+            // Server-custodial mode executes trades autonomously on backend.
+            if (window.SERVER_CUSTODIAL_MODE === true) return;
+            if (!liveTradingEnabled || !phantomPublicKey) return;
+            if (executedLiveBuys.has(signalId)) return;
+            executedLiveBuys.add(signalId);
+            try {
+                const preBalRes = await fetch(`/api/trading/token-balance?owner=${encodeURIComponent(phantomPublicKey)}&mint=${encodeURIComponent(tokenMint)}`);
+                const preBal = await preBalRes.json();
+                const preUi = Number(preBal.ui_amount || 0);
+
+                const lamports = Math.floor(liveBuyAmountSol * 1_000_000_000);
+                const { sig, quoteData, slippage } = await performSwapWithRetries(SOL_MINT, tokenMint, lamports);
+                const postBalRes = await fetch(`/api/trading/token-balance?owner=${encodeURIComponent(phantomPublicKey)}&mint=${encodeURIComponent(tokenMint)}`);
+                const postBal = await postBalRes.json();
+                const postUi = Number(postBal.ui_amount || 0);
+                const boughtUi = Math.max(0, postUi - preUi);
+                const solSpent = Number(quoteData.inAmount || lamports) / 1_000_000_000;
+
+                if (boughtUi > 0) {
+                    await fetch('/api/live-trading/record-buy', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            token: tokenMint,
+                            token_amount: boughtUi,
+                            sol_spent: solSpent,
+                            tx_sig: sig
+                        })
+                    });
+                }
+                log(`LIVE BUY sent: ${tokenMint.substring(0, 8)}... tx ${sig.substring(0, 10)}... (slippage ${slippage / 100}%)`);
+            } catch (e) {
+                log(`LIVE BUY failed: ${e.message || e}`);
+            }
+        }
+
+        async function executeLiveSell(tokenMint, reasonTag = '') {
+            // Server-custodial mode executes trades autonomously on backend.
+            if (window.SERVER_CUSTODIAL_MODE === true) return;
+            if (!liveTradingEnabled || !phantomPublicKey) return;
+            const sellKey = `${tokenMint}:${reasonTag}`;
+            if (executedLiveSells.has(sellKey)) return;
+            executedLiveSells.add(sellKey);
+            try {
+                const balRes = await fetch(`/api/trading/token-balance?owner=${encodeURIComponent(phantomPublicKey)}&mint=${encodeURIComponent(tokenMint)}`);
+                const bal = await balRes.json();
+                const rawAmount = String(bal.raw_amount || "0");
+                const uiAmount = Number(bal.ui_amount || 0);
+                if (!rawAmount || rawAmount === "0") {
+                    log(`LIVE SELL skipped (no balance): ${tokenMint.substring(0, 8)}...`);
+                    return;
+                }
+                const { sig, quoteData, slippage } = await performSwapWithRetries(tokenMint, SOL_MINT, Number(rawAmount));
+                const solReceived = Number(quoteData.outAmount || 0) / 1_000_000_000;
+                await fetch('/api/live-trading/record-sell', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        token: tokenMint,
+                        token_amount_sold: uiAmount,
+                        sol_received: solReceived,
+                        reason: reasonTag,
+                        tx_sig: sig
+                    })
+                });
+                log(`LIVE SELL sent: ${tokenMint.substring(0, 8)}... tx ${sig.substring(0, 10)}... (slippage ${slippage / 100}%)`);
+            } catch (e) {
+                log(`LIVE SELL failed: ${e.message || e}`);
+            }
+        }
 
         // --- KOL Manager Logic ---
         function toggleManager() {
@@ -578,10 +828,34 @@
                 updateFeedItem(data);
             } else if (data.type === 'pnl_update') {
                 updatePNL(data.data);
+            } else if (data.type === 'live_pnl_update') {
+                updateLivePNL(data.data);
             } else if (data.type === 'positions_update') {
                 updatePositions(data.data);
+            } else if (data.type === 'paper_sell_signal') {
+                if (data.data && data.data.token) {
+                    executeLiveSell(data.data.token, data.data.reason || '');
+                }
             }
         };
+
+        const amountToggleBtn = document.getElementById('amount-toggle-btn');
+        if (amountToggleBtn) amountToggleBtn.innerText = `Amount: ${amountCurrency}`;
+        fetchSolPrice();
+        setInterval(fetchSolPrice, 60000);
+        fetch('/api/live-trading/stats').then(r => r.json()).then(updateLivePNL).catch(() => { });
+        window.SERVER_CUSTODIAL_MODE = false;
+        fetch('/api/trading/custodial-status')
+            .then(r => r.json())
+            .then(d => {
+                window.SERVER_CUSTODIAL_MODE = !!d.enabled;
+                if (d.enabled) {
+                    log(`Server custodial trading enabled (${(d.wallet || '').substring(0, 8)}...)`);
+                    const b = document.getElementById('live-trade-btn');
+                    if (b) b.innerText = 'Live Trading: SERVER';
+                }
+            })
+            .catch(() => { });
 
         function formatMCap(val) {
             if (!val || val === 0) return "$0";
@@ -643,6 +917,69 @@
             if (posEl) posEl.innerText = stats.active_positions;
         }
 
+        function toggleCustodialKeyModal() {
+            const panel = document.getElementById('custodial-key-panel');
+            panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+        }
+
+        async function importCustodialKey() {
+            const key = (document.getElementById('custodial-private-key').value || '').trim();
+            const enableTrading = !!document.getElementById('custodial-enable').checked;
+            if (!key) {
+                alert("Private key is required.");
+                return;
+            }
+            try {
+                const res = await fetch('/api/trading/import-key', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ private_key: key, enable_trading: enableTrading })
+                });
+                const data = await res.json();
+                if (!res.ok || data.error) {
+                    alert(data.error || 'Failed to import key');
+                    return;
+                }
+                window.SERVER_CUSTODIAL_MODE = !!data.enabled;
+                const b = document.getElementById('live-trade-btn');
+                if (b) b.innerText = data.enabled ? 'Live Trading: SERVER' : 'Live Trading: OFF';
+                log(`Custodial key loaded (${(data.wallet || '').substring(0, 8)}...)`);
+                document.getElementById('custodial-private-key').value = '';
+                toggleCustodialKeyModal();
+            } catch (e) {
+                alert(`Import failed: ${e.message || e}`);
+            }
+        }
+
+        async function clearCustodialKey() {
+            try {
+                const res = await fetch('/api/trading/clear-key', { method: 'POST' });
+                const data = await res.json();
+                if (!res.ok || data.error) {
+                    alert(data.error || 'Failed to clear key');
+                    return;
+                }
+                window.SERVER_CUSTODIAL_MODE = false;
+                const b = document.getElementById('live-trade-btn');
+                if (b) b.innerText = 'Live Trading: OFF';
+                log('Custodial key cleared; server back to simulation mode.');
+            } catch (e) {
+                alert(`Clear failed: ${e.message || e}`);
+            }
+        }
+
+        function updateLivePNL(stats) {
+            const pnlEl = document.getElementById('live-pnl-val');
+            const posEl = document.getElementById('live-open-pos');
+            const total = Number(stats.total_pnl_sol || 0);
+            const openPos = Number(stats.open_positions || 0);
+            if (pnlEl) {
+                pnlEl.innerText = total.toFixed(4) + " SOL";
+                pnlEl.style.color = total >= 0 ? '#00ff9d' : '#ff0055';
+            }
+            if (posEl) posEl.innerText = openPos;
+        }
+
         function log(msg) {
             const div = document.createElement('div');
             div.textContent = `> ${msg}`;
@@ -684,11 +1021,15 @@
                     div.style.background = "rgba(255, 215, 0, 0.1)";
                 }
                 else if (data.kol_label && data.kol_wallet) {
+                    const kolSide = data.kol_side || 'TRADE';
+                    const kolSol = Number(data.kol_sol_amount || 0);
+                    const amountHtml = `<span class="kol-amount" data-sol="${kolSol}" data-side="${kolSide}">${formatKOLAmount(kolSol, kolSide)}</span>`;
                     sourceHTML = `
                         <span class="badge" style="background:#b300ff; color:#fff">Found by: ${data.kol_label}</span>
                         <span class="token" title="${data.kol_wallet}" onclick="copyToClipboard('${data.kol_wallet}')" style="color:#aaa; font-size:0.8rem; margin-right:10px;">
                             [${data.kol_wallet.substring(0, 4)}..${data.kol_wallet.substring(data.kol_wallet.length - 4)}]
                         </span>
+                        ${amountHtml}
                     `;
                 } else {
                     sourceHTML = `<span class="badge" style="background:#555; color:#fff">${data.source || 'UNK'}</span>`;
@@ -711,6 +1052,7 @@
             const oldHeight = feed.scrollHeight;
 
             feed.prepend(div);
+            renderKOLAmounts();
 
             if (!isAtTop) {
                 // Pin scroll to the item user was looking at
@@ -721,12 +1063,26 @@
         function updateFeedItem(data) {
             const el = document.getElementById(data.signature);
             if (el) {
+                if (!el.querySelector('.kol-amount') && data.kol_wallet && data.kol_label) {
+                    const walletToken = el.querySelector('.token[title]');
+                    if (walletToken) {
+                        const span = document.createElement('span');
+                        span.className = 'kol-amount';
+                        span.setAttribute('data-sol', String(Number(data.kol_sol_amount || 0)));
+                        span.setAttribute('data-side', data.kol_side || 'TRADE');
+                        span.textContent = formatKOLAmount(Number(data.kol_sol_amount || 0), data.kol_side || 'TRADE');
+                        walletToken.insertAdjacentElement('afterend', span);
+                    }
+                }
                 let badgeClass = 'risk';
                 let displayStatus = data.status;
 
                 if (data.status === 'BUY_SIGNAL') {
                     badgeClass = 'safe';
-                    displayStatus = '🎯 BUY';
+                    displayStatus = 'BUY';
+                    if (data.token) {
+                        executeLiveBuy(data.token, data.signature || data.token);
+                    }
                 } else if (data.status === 'SAFE') {
                     badgeClass = 'safe';
                 } else if (data.status === 'SUPER_ALPHA') {
@@ -787,3 +1143,9 @@
     </script>
 
 </html>
+
+
+
+
+
+
