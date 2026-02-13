@@ -330,6 +330,86 @@
             font-size: 0.78rem;
             margin-right: 10px;
         }
+
+        /* Settings modal responsiveness + accessibility */
+        #settings-panel {
+            width: min(860px, 94vw) !important;
+            min-width: 0 !important;
+            max-height: 92vh !important;
+            overflow-y: auto !important;
+            border-radius: 12px !important;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(0, 255, 157, 0.2);
+            background: linear-gradient(180deg, #171717 0%, #101010 100%) !important;
+            padding: 16px !important;
+        }
+
+        #settings-panel>h3 {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            background: rgba(16, 16, 16, 0.94);
+            margin: -16px -16px 12px !important;
+            padding: 12px 16px;
+            border-bottom: 1px solid #262626;
+        }
+
+        #settings-panel>div {
+            border: 1px solid #2b2b2b;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.02);
+            padding: 10px;
+            margin-bottom: 10px !important;
+        }
+
+        #settings-panel input[type="number"],
+        #settings-panel input[type="text"] {
+            background: #0b0b0b !important;
+            border-radius: 6px;
+        }
+
+        #settings-panel label {
+            line-height: 1.35;
+        }
+
+        .settings-inline-help {
+            display: block;
+            margin-top: 2px;
+            font-size: 0.72rem;
+            color: #7c7c7c;
+            line-height: 1.25;
+        }
+
+        #settings-panel input:focus,
+        #settings-panel button:focus {
+            outline: 2px solid rgba(0, 255, 157, 0.55);
+            outline-offset: 1px;
+            border-color: var(--accent);
+        }
+
+        .settings-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.72);
+            backdrop-filter: blur(2px);
+            z-index: 999;
+        }
+
+        @media (max-width: 820px) {
+            #settings-panel {
+                width: 96vw !important;
+                max-height: 88vh !important;
+                padding: 12px !important;
+            }
+
+            #settings-panel>h3 {
+                margin: -12px -12px 10px !important;
+                padding: 10px 12px;
+            }
+
+            #settings-panel>div {
+                padding: 8px;
+            }
+        }
     </style>
 </head>
 
@@ -343,9 +423,8 @@
             <button onclick="toggleSettings()">⚙️ Settings</button>
             <button id="pause-btn" onclick="togglePause()">⏸ PAUSE</button>
             <button id="amount-toggle-btn" onclick="toggleAmountCurrency()">Amount: SOL</button>
-            <button id="phantom-connect-btn" onclick="connectPhantom()">Connect Phantom</button>
-            <button id="live-trade-btn" onclick="toggleLiveTrading()">Live Trading: OFF</button>
-            <button id="custodial-key-btn" onclick="toggleCustodialKeyModal()">Import Server Key</button>
+            <button id="live-trade-btn" onclick="toggleLiveTrading()">Live Trading: --</button>
+            <button id="custodial-key-btn" onclick="toggleCustodialKeyModal()">Import Wallet</button>
 
             <div id="pnl-board" style="font-size:0.9rem; color:#888;">
                 PAPER PNL: <span id="pnl-val" style="color:#fff">0.00 SOL</span>
@@ -378,6 +457,31 @@
         <h3 style="margin-top:0; color:var(--accent); font-size:1rem;">⚙️ SETTINGS</h3>
 
         <div style="margin-bottom:15px;">
+            <label style="display:block; margin-bottom:8px; color:var(--dim);">Trading Modes (multi-select)</label>
+            <div style="display:flex; flex-direction:column; gap:8px; border:1px solid var(--dim); padding:10px;">
+                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                    <input type="checkbox" id="mode-kol-momentum" value="kol_momentum_scalper" checked>
+                    <span>KOL Momentum Scalper</span>
+                </label>
+                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                    <input type="checkbox" id="mode-early20" value="early_20_scalper">
+                    <span>Early 20 Scalper</span>
+                </label>
+                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                    <input type="checkbox" id="mode-launch-burst" value="kol_launch_burst_scalper">
+                    <span>KOL Launch Burst Scalper</span>
+                </label>
+                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                    <input type="checkbox" id="mode-chart-pro" value="chart_pro_breakout_scalper">
+                    <span>Chart Pro Breakout Scalper</span>
+                </label>
+            </div>
+            <div style="margin-top:5px; font-size:0.75rem; color:var(--dim);">
+                Enable one or many. Early 20: higher frequency with quick ~20% exits. Burst: first-minute launch capture with staged exits.
+            </div>
+        </div>
+
+        <div style="margin-bottom:15px;">
             <label style="display:block; margin-bottom:5px; color:var(--dim);">SOL Amount Range (per trade)</label>
             <div style="display:flex; gap:10px; align-items:center;">
                 <div style="flex:1;">
@@ -393,6 +497,213 @@
             </div>
             <div style="margin-top:5px; font-size:0.75rem; color:var(--dim);">
                 System will randomly choose an amount between min and max for each trade
+            </div>
+        </div>
+
+        <div style="margin-bottom:15px;">
+            <label style="display:block; margin-bottom:5px; color:var(--dim);">Max Live Open Positions</label>
+            <input type="number" id="max-live-open" step="1" min="0" placeholder="2"
+                style="width:120px; padding:8px; background:var(--bg); border:1px solid var(--dim); color:var(--text); font-family:var(--font);">
+            <div style="margin-top:5px; font-size:0.75rem; color:var(--dim);">
+                0 = unlimited. Limits concurrent live positions for risk control.
+            </div>
+        </div>
+
+        <div style="margin-bottom:15px;">
+            <label style="display:block; margin-bottom:5px; color:var(--dim);">Token Cooldown (seconds)</label>
+            <input type="number" id="token-cooldown-sec" step="1" min="0" placeholder="900"
+                style="width:140px; padding:8px; background:var(--bg); border:1px solid var(--dim); color:var(--text); font-family:var(--font);">
+            <div style="margin-top:5px; font-size:0.75rem; color:var(--dim);">
+                Time to wait before re-entering the same token after it closes. 0 = no cooldown.
+            </div>
+        </div>
+
+        <div style="margin-bottom:15px;">
+            <label style="display:block; margin-bottom:5px; color:var(--dim);">Max Token Age (seconds)</label>
+            <input type="number" id="max-token-age-sec" step="1" min="0" placeholder="259200"
+                style="width:160px; padding:8px; background:var(--bg); border:1px solid var(--dim); color:var(--text); font-family:var(--font);">
+            <div style="margin-top:5px; font-size:0.75rem; color:var(--dim);">
+                Skip entries for tokens older than this threshold. 0 = no age limit (default 259200 = 3 days).
+            </div>
+        </div>
+
+        <div style="margin-bottom:15px;">
+            <label style="display:block; margin-bottom:8px; color:var(--dim);">Min Market Cap by Strategy (USD)</label>
+            <div style="display:grid; grid-template-columns: 1fr 140px; gap:8px 10px; align-items:center;">
+                <label style="font-size:0.8rem; color:var(--dim);">KOL Momentum Scalper</label>
+                <input type="number" id="mcap-kol-min" step="100" min="0" placeholder="0"
+                    style="width:100%; padding:8px; background:var(--bg); border:1px solid var(--dim); color:var(--text); font-family:var(--font);">
+                <label style="font-size:0.8rem; color:var(--dim);">Early 20 Scalper</label>
+                <input type="number" id="mcap-early20-min" step="100" min="0" placeholder="7000"
+                    style="width:100%; padding:8px; background:var(--bg); border:1px solid var(--dim); color:var(--text); font-family:var(--font);">
+                <label style="font-size:0.8rem; color:var(--dim);">KOL Launch Burst Scalper</label>
+                <input type="number" id="mcap-launch-burst-min" step="100" min="0" placeholder="7000"
+                    style="width:100%; padding:8px; background:var(--bg); border:1px solid var(--dim); color:var(--text); font-family:var(--font);">
+                <label style="font-size:0.8rem; color:var(--dim);">Chart Pro Breakout Scalper</label>
+                <input type="number" id="mcap-chart-pro-min" step="100" min="0" placeholder="20000"
+                    style="width:100%; padding:8px; background:var(--bg); border:1px solid var(--dim); color:var(--text); font-family:var(--font);">
+            </div>
+            <div style="margin-top:5px; font-size:0.75rem; color:var(--dim);">
+                Set to 0 to disable the minimum market-cap gate for that strategy.
+            </div>
+        </div>
+
+        <div style="margin-bottom:15px; border:1px solid var(--dim); padding:10px;">
+            <label style="display:flex; align-items:center; gap:8px; margin-bottom:10px; color:var(--dim);">
+                <input type="checkbox" id="chart-pro-enabled" checked>
+                Enable Chart Pro Signal Engine
+            </label>
+            <div class="settings-inline-help" style="margin-bottom:10px;">
+                Entry model: 5m trend bias + 1m breakout trigger. Lower thresholds = more trades, higher thresholds = stricter quality.
+            </div>
+            <div style="display:grid; grid-template-columns: 1fr 120px; gap:8px 10px; align-items:center;">
+                <label style="font-size:0.8rem; color:var(--dim);" title="How many recent 1m candles define the breakout level.">Breakout Lookback Bars
+                    <span class="settings-inline-help">Higher = fewer but cleaner breakouts. Typical 10-25.</span>
+                </label>
+                <input type="number" id="chart-lookback-bars" step="1" min="5" placeholder="20"
+                    style="width:100%; padding:8px; background:var(--bg); border:1px solid var(--dim); color:var(--text); font-family:var(--font);">
+                <label style="font-size:0.8rem; color:var(--dim);" title="Current 1m volume divided by recent average 1m volume.">Min Volume Multiple
+                    <span class="settings-inline-help">Higher = stronger confirmation, fewer entries. Typical 1.3-2.2.</span>
+                </label>
+                <input type="number" id="chart-min-vol-multiple" step="0.1" min="0.1" placeholder="1.8"
+                    style="width:100%; padding:8px; background:var(--bg); border:1px solid var(--dim); color:var(--text); font-family:var(--font);">
+                <label style="font-size:0.8rem; color:var(--dim);" title="Minimum quality score required for Chart Pro buy.">Min Chart Score
+                    <span class="settings-inline-help">0-100 quality gate. Lower = more trades. Typical 35-55.</span>
+                </label>
+                <input type="number" id="chart-min-score" step="1" min="0" placeholder="42"
+                    style="width:100%; padding:8px; background:var(--bg); border:1px solid var(--dim); color:var(--text); font-family:var(--font);">
+                <label style="font-size:0.8rem; color:var(--dim);" title="Minimum pool liquidity required for Chart Pro entry.">Min Liquidity (USD)
+                    <span class="settings-inline-help">0 disables this gate. Higher = safer fills, fewer entries.</span>
+                </label>
+                <input type="number" id="chart-min-liquidity-usd" step="100" min="0" placeholder="6000"
+                    style="width:100%; padding:8px; background:var(--bg); border:1px solid var(--dim); color:var(--text); font-family:var(--font);">
+                <label style="font-size:0.8rem; color:var(--dim);" title="Stop distance as ATR multiplier.">Stop ATR Mult
+                    <span class="settings-inline-help">Higher = wider stop, fewer stop-outs, larger loss size. Typical 1.0-1.8.</span>
+                </label>
+                <input type="number" id="chart-stop-atr-mult" step="0.1" min="0.1" placeholder="1.2"
+                    style="width:100%; padding:8px; background:var(--bg); border:1px solid var(--dim); color:var(--text); font-family:var(--font);">
+                <label style="font-size:0.8rem; color:var(--dim);" title="First take-profit in R (risk multiple).">TP1 (R)
+                    <span class="settings-inline-help">1.0R means profit equals initial risk. Typical 0.8-1.5.</span>
+                </label>
+                <input type="number" id="chart-tp1-r" step="0.1" min="0.1" placeholder="1.0"
+                    style="width:100%; padding:8px; background:var(--bg); border:1px solid var(--dim); color:var(--text); font-family:var(--font);">
+                <label style="font-size:0.8rem; color:var(--dim);" title="Second take-profit in R (risk multiple).">TP2 (R)
+                    <span class="settings-inline-help">Should be >= TP1. Typical 1.8-3.0.</span>
+                </label>
+                <input type="number" id="chart-tp2-r" step="0.1" min="0.1" placeholder="2.0"
+                    style="width:100%; padding:8px; background:var(--bg); border:1px solid var(--dim); color:var(--text); font-family:var(--font);">
+                <label style="font-size:0.8rem; color:var(--dim);" title="Trailing-stop distance for the runner, in ATR units.">Runner Trail ATR Mult
+                    <span class="settings-inline-help">Lower locks profit faster; higher lets winners run longer.</span>
+                </label>
+                <input type="number" id="chart-runner-trail-atr-mult" step="0.1" min="0.1" placeholder="1.5"
+                    style="width:100%; padding:8px; background:var(--bg); border:1px solid var(--dim); color:var(--text); font-family:var(--font);">
+                <label style="font-size:0.8rem; color:var(--dim);" title="Hard time-based exit even if TP/SL not hit.">Max Hold (sec)
+                    <span class="settings-inline-help">Shorter = faster turnover. Typical 300-1800 sec.</span>
+                </label>
+                <input type="number" id="chart-max-hold-sec" step="1" min="1" placeholder="360"
+                    style="width:100%; padding:8px; background:var(--bg); border:1px solid var(--dim); color:var(--text); font-family:var(--font);">
+                <label style="font-size:0.8rem; color:var(--dim);" title="Wait time before re-entering the same token after close.">Chart Cooldown (sec)
+                    <span class="settings-inline-help">Prevents churn/revenge re-entry. 0 disables cooldown.</span>
+                </label>
+                <input type="number" id="chart-cooldown-sec" step="1" min="0" placeholder="900"
+                    style="width:100%; padding:8px; background:var(--bg); border:1px solid var(--dim); color:var(--text); font-family:var(--font);">
+                <label style="font-size:0.8rem; color:var(--dim);" title="Maximum number of tokens Chart Pro can actively monitor at once.">Max Monitored Tokens
+                    <span class="settings-inline-help">Higher = broader coverage but more API load. Typical 8-20.</span>
+                </label>
+                <input type="number" id="chart-watch-max-tokens" step="1" min="1" max="250" placeholder="16"
+                    style="width:100%; padding:8px; background:var(--bg); border:1px solid var(--dim); color:var(--text); font-family:var(--font);">
+                <label style="font-size:0.8rem; color:var(--dim);" title="Chart watch behavior profile.">Focus Profile
+                    <span class="settings-inline-help">Quality-first reduces noise; high-frequency increases attempts.</span>
+                </label>
+                <select id="chart-watch-focus-profile"
+                    style="width:100%; padding:8px; background:var(--bg); border:1px solid var(--dim); color:var(--text); font-family:var(--font);">
+                    <option value="quality_first">quality_first</option>
+                    <option value="balanced">balanced</option>
+                    <option value="high_frequency">high_frequency</option>
+                </select>
+                <label style="font-size:0.8rem; color:var(--dim);" title="Minimum m5 volume to admit token into active Chart watch.">Admission Min Vol m5 (USD)
+                    <span class="settings-inline-help">Filters low-activity tokens before watch loop.</span>
+                </label>
+                <input type="number" id="chart-watch-adm-vol" step="100" min="0" placeholder="12000"
+                    style="width:100%; padding:8px; background:var(--bg); border:1px solid var(--dim); color:var(--text); font-family:var(--font);">
+                <label style="font-size:0.8rem; color:var(--dim);" title="Max token age for Chart watch admission.">Admission Max Age (sec)
+                    <span class="settings-inline-help">86400 = 24h freshness bias.</span>
+                </label>
+                <input type="number" id="chart-watch-adm-age" step="1" min="0" placeholder="86400"
+                    style="width:100%; padding:8px; background:var(--bg); border:1px solid var(--dim); color:var(--text); font-family:var(--font);">
+                <label style="font-size:0.8rem; color:var(--dim);" title="Maximum market cap allowed into active Chart watch.">Admission Max MCAP (USD)
+                    <span class="settings-inline-help">Keeps mega-caps out of scalper watchlist. Typical 1M-20M.</span>
+                </label>
+                <input type="number" id="chart-watch-adm-mcap-max" step="1000" min="0" placeholder="100000000"
+                    style="width:100%; padding:8px; background:var(--bg); border:1px solid var(--dim); color:var(--text); font-family:var(--font);">
+                <label style="font-size:0.8rem; color:var(--dim);" title="Trend scanner interval in seconds.">Trend Scan Interval (sec)
+                    <span class="settings-inline-help">Lower = faster candidate refresh. Balanced default is 20s.</span>
+                </label>
+                <input type="number" id="chart-trend-scan-interval" step="1" min="10" placeholder="20"
+                    style="width:100%; padding:8px; background:var(--bg); border:1px solid var(--dim); color:var(--text); font-family:var(--font);">
+                <label style="font-size:0.8rem; color:var(--dim);" title="How many new candidates can be admitted per trend scan.">Trend Max New / Scan
+                    <span class="settings-inline-help">Balanced default is 6. Higher fills faster with more API load.</span>
+                </label>
+                <input type="number" id="chart-trend-max-new" step="1" min="1" max="25" placeholder="6"
+                    style="width:100%; padding:8px; background:var(--bg); border:1px solid var(--dim); color:var(--text); font-family:var(--font);">
+                <label style="font-size:0.8rem; color:var(--dim);" title="Trending source policy for candidate intake.">Trend Source Mode
+                    <span class="settings-inline-help">Birdeye-first for quality; auto-fallback keeps scanner alive.</span>
+                </label>
+                <select id="chart-watch-source-mode"
+                    style="width:100%; padding:8px; background:var(--bg); border:1px solid var(--dim); color:var(--text); font-family:var(--font);">
+                    <option value="birdeye_primary">birdeye_primary</option>
+                    <option value="public_fallback">public_fallback</option>
+                </select>
+                <label style="font-size:0.8rem; color:var(--dim);" title="Default table visibility mode for chart watch rows.">Watch Table Mode
+                    <span class="settings-inline-help">Admitted-only hides rejected noise by default.</span>
+                </label>
+                <select id="chart-watch-table-mode"
+                    style="width:100%; padding:8px; background:var(--bg); border:1px solid var(--dim); color:var(--text); font-family:var(--font);">
+                    <option value="admitted_only">admitted_only</option>
+                    <option value="all">all</option>
+                </select>
+                <label style="font-size:0.8rem; color:var(--dim);" title="Backoff base seconds for repeated watch failures.">Failure Backoff Base (sec)
+                    <span class="settings-inline-help">Used for exponential retry spacing on low-quality tokens.</span>
+                </label>
+                <input type="number" id="chart-watch-backoff-base" step="1" min="1" placeholder="20"
+                    style="width:100%; padding:8px; background:var(--bg); border:1px solid var(--dim); color:var(--text); font-family:var(--font);">
+                <label style="font-size:0.8rem; color:var(--dim);" title="Backoff max seconds cap for repeated failures.">Failure Backoff Max (sec)
+                    <span class="settings-inline-help">Hard cap for retry delay.</span>
+                </label>
+                <input type="number" id="chart-watch-backoff-max" step="1" min="1" placeholder="600"
+                    style="width:100%; padding:8px; background:var(--bg); border:1px solid var(--dim); color:var(--text); font-family:var(--font);">
+                <label style="font-size:0.8rem; color:var(--dim);" title="How many watched tokens can be evaluated each monitor cycle.">Eval Budget / Cycle
+                    <span class="settings-inline-help">Lower values reduce API load and queue pressure.</span>
+                </label>
+                <input type="number" id="chart-watch-eval-budget" step="1" min="1" max="20" placeholder="8"
+                    style="width:100%; padding:8px; background:var(--bg); border:1px solid var(--dim); color:var(--text); font-family:var(--font);">
+            </div>
+            <label style="display:flex; align-items:center; gap:8px; margin-top:10px; font-size:0.8rem; color:var(--dim);" title="Run one-time fast fill on startup to populate admitted candidates quickly.">
+                <input type="checkbox" id="chart-watch-startup-burst-enabled" checked>
+                Enable startup burst fill
+            </label>
+            <div style="display:grid; grid-template-columns: 1fr 120px; gap:8px 10px; align-items:center; margin-top:8px;">
+                <label style="font-size:0.8rem; color:var(--dim);" title="Startup burst target admitted candidates.">Startup Burst Target
+                    <span class="settings-inline-help">Recommended 12 for fast initial watchlist fill.</span>
+                </label>
+                <input type="number" id="chart-watch-startup-burst-target" step="1" min="1" max="100" placeholder="12"
+                    style="width:100%; padding:8px; background:var(--bg); border:1px solid var(--dim); color:var(--text); font-family:var(--font);">
+                <label style="font-size:0.8rem; color:var(--dim);" title="Maximum seconds spent on startup burst.">Startup Burst Timeout (sec)
+                    <span class="settings-inline-help">Stops early once target is reached or timeout expires.</span>
+                </label>
+                <input type="number" id="chart-watch-startup-burst-timeout" step="1" min="5" max="300" placeholder="30"
+                    style="width:100%; padding:8px; background:var(--bg); border:1px solid var(--dim); color:var(--text); font-family:var(--font);">
+            </div>
+            <label style="display:flex; align-items:center; gap:8px; margin-top:10px; font-size:0.8rem; color:var(--dim);" title="Requires breakout to retest and hold before entry.">
+                <input type="checkbox" id="chart-require-retest">
+                Require breakout retest hold
+            </label>
+            <label style="display:flex; align-items:center; gap:8px; margin-top:8px; font-size:0.8rem; color:var(--dim);" title="Hide suppressed/filtered rows in watchlist by default.">
+                <input type="checkbox" id="chart-watch-hide-filtered" checked>
+                Hide suppressed rows by default
+            </label>
+            <div class="settings-inline-help">
+                ON = safer but fewer entries. OFF = faster breakout entries with more false-breakout risk.
             </div>
         </div>
 
@@ -418,6 +729,8 @@
         </label>
         <div style="display:flex; gap:10px; justify-content:flex-end;">
             <button onclick="clearCustodialKey()" style="border-color:var(--danger); color:var(--danger);">Clear Key</button>
+            <button onclick="archiveResetPaperState()" style="border-color:#ffb000; color:#ffb000;">Archive/Reset Paper</button>
+            <button onclick="archiveResetLiveState()" style="border-color:#ff9500; color:#ff9500;">Archive/Reset Live</button>
             <button onclick="toggleCustodialKeyModal()" style="background:var(--bg);">Close</button>
             <button onclick="importCustodialKey()" style="background:var(--accent); color:#000; border-color:var(--accent);">Import Key</button>
         </div>
@@ -425,7 +738,7 @@
 
     <!-- Live Trades Panel -->
     <div id="trades-panel">
-        <h3 style="margin-top:0; color:var(--accent); font-size:1rem; margin-bottom:10px;">📊 ACTIVE POSITIONS</h3>
+        <h3 style="margin-top:0; color:var(--accent); font-size:1rem; margin-bottom:10px;">📊 PAPER ACTIVE POSITIONS</h3>
         <table id="trades-table">
             <thead>
                 <tr>
@@ -437,16 +750,72 @@
                     <th>PNL (%)</th>
                     <th>TIME</th>
                     <th>STATUS</th>
+                    <th>ACTION</th>
                 </tr>
             </thead>
             <tbody id="trades-body">
                 <tr>
-                    <td colspan="8" style="text-align:center; color:var(--dim); padding:20px;">No active positions</td>
+                    <td colspan="9" style="text-align:center; color:var(--dim); padding:20px;">No PAPER ACTIVE POSITIONS</td>
                 </tr>
             </tbody>
         </table>
     </div>
 
+    
+    <div id="live-trades-panel" style="background: var(--panel); border: 1px solid #1f5eff; padding: 15px; margin-bottom: 20px;">
+        <h3 style="margin-top:0; color:#7fa8ff; font-size:1rem; margin-bottom:10px;">LIVE OPEN POSITIONS</h3>
+        <table id="live-trades-table" style="width:100%; border-collapse:collapse; font-size:0.75rem;">
+            <thead>
+                <tr>
+                    <th style="text-align:left; padding:8px 4px; border-bottom:1px solid #1f5eff; color:#7fa8ff; font-weight:normal;">TOKEN</th>
+                    <th style="text-align:left; padding:8px 4px; border-bottom:1px solid #1f5eff; color:#7fa8ff; font-weight:normal;">TOKEN AMOUNT</th>
+                    <th style="text-align:left; padding:8px 4px; border-bottom:1px solid #1f5eff; color:#7fa8ff; font-weight:normal;">SOL SPENT</th>
+                    <th style="text-align:left; padding:8px 4px; border-bottom:1px solid #1f5eff; color:#7fa8ff; font-weight:normal;">AVG ENTRY MCAP</th>
+                    <th style="text-align:left; padding:8px 4px; border-bottom:1px solid #1f5eff; color:#7fa8ff; font-weight:normal;">CURRENT MC</th>
+                    <th style="text-align:left; padding:8px 4px; border-bottom:1px solid #1f5eff; color:#7fa8ff; font-weight:normal;">PNL ($)</th>
+                    <th style="text-align:left; padding:8px 4px; border-bottom:1px solid #1f5eff; color:#7fa8ff; font-weight:normal;">PNL (%)</th>
+                    <th style="text-align:left; padding:8px 4px; border-bottom:1px solid #1f5eff; color:#7fa8ff; font-weight:normal;">OPENED</th>
+                    <th style="text-align:left; padding:8px 4px; border-bottom:1px solid #1f5eff; color:#7fa8ff; font-weight:normal;">ELAPSED</th>
+                    <th style="text-align:left; padding:8px 4px; border-bottom:1px solid #1f5eff; color:#7fa8ff; font-weight:normal;">ACTION</th>
+                </tr>
+            </thead>
+            <tbody id="live-trades-body">
+                <tr>
+                    <td colspan="10" style="text-align:center; color:var(--dim); padding:20px;">No live positions</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div id="chart-watch-panel" style="background: var(--panel); border: 1px solid #ffb000; padding: 15px; margin-bottom: 20px;">
+        <h3 style="margin-top:0; color:#ffcf5a; font-size:1rem; margin-bottom:6px;">CHART PRO WATCHLIST</h3>
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:8px;">
+            <div id="chart-watch-summary" style="font-size:0.75rem; color:#b8b8b8;">0 monitored</div>
+            <label style="display:flex; align-items:center; gap:6px; font-size:0.72rem; color:#9a9a9a;">
+                <input type="checkbox" id="chart-watch-hide-filtered-toggle" checked>
+                Hide filtered
+            </label>
+        </div>
+        <div id="chart-watch-counters" style="font-size:0.72rem; color:#9a9a9a; margin-bottom:10px;">admitted 0 | suppressed 0 | age rej 0 | mcap rej 0 | rate-limited 0 | entry-near 0 | eval/min 0 | pool 0->0</div>
+        <table id="chart-watch-table" style="width:100%; border-collapse:collapse; font-size:0.72rem;">
+            <thead>
+                <tr>
+                    <th style="text-align:left; padding:6px 4px; border-bottom:1px solid #ffb000; color:#ffcf5a; font-weight:normal;">TOKEN</th>
+                    <th style="text-align:left; padding:6px 4px; border-bottom:1px solid #ffb000; color:#ffcf5a; font-weight:normal;">STATE</th>
+                    <th style="text-align:left; padding:6px 4px; border-bottom:1px solid #ffb000; color:#ffcf5a; font-weight:normal;">AGE</th>
+                    <th style="text-align:left; padding:6px 4px; border-bottom:1px solid #ffb000; color:#ffcf5a; font-weight:normal;">VOL M5</th>
+                    <th style="text-align:left; padding:6px 4px; border-bottom:1px solid #ffb000; color:#ffcf5a; font-weight:normal;">SOURCE</th>
+                    <th style="text-align:left; padding:6px 4px; border-bottom:1px solid #ffb000; color:#ffcf5a; font-weight:normal;">STATUS</th>
+                    <th style="text-align:left; padding:6px 4px; border-bottom:1px solid #ffb000; color:#ffcf5a; font-weight:normal;">DETAIL</th>
+                </tr>
+            </thead>
+            <tbody id="chart-watch-body">
+                <tr>
+                    <td colspan="7" style="text-align:center; color:var(--dim); padding:16px;">No monitored tokens</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
     <div id="feed">
         <!-- Feed Items Go Here -->
     </div>
@@ -462,15 +831,52 @@
         const logs = document.getElementById('logs');
         const socket = new WebSocket(`ws://${location.host}/ws`);
 
-        let isPaused = false;
+        let isPaused = localStorage.getItem('dashboardPaused') === '1';
         let amountCurrency = localStorage.getItem('amountCurrency') || 'SOL';
         let solUsd = 0;
         let phantomPublicKey = null;
         let liveTradingEnabled = false;
         let liveBuyAmountSol = 0.10;
+        let chartWatchLastData = null;
         const executedLiveBuys = new Set();
         const executedLiveSells = new Set();
         const SOL_MINT = "So11111111111111111111111111111111111111112";
+
+        function setLiveTradingIndicator(mode) {
+            const btn = document.getElementById('live-trade-btn');
+            if (!btn) return;
+            if (mode === 'ON') {
+                btn.innerText = 'Live Trading: ON';
+                btn.style.color = '#00ff9d';
+                return;
+            }
+            if (mode === 'PAUSED') {
+                btn.innerText = 'Live Trading: PAUSED';
+                btn.style.color = '#ff0055';
+                return;
+            }
+            if (mode === 'OFF') {
+                btn.innerText = 'Live Trading: OFF';
+                btn.style.color = 'var(--text)';
+                return;
+            }
+            btn.innerText = 'Live Trading: --';
+            btn.style.color = 'var(--text)';
+        }
+
+        function renderPauseButtonState() {
+            const btn = document.getElementById('pause-btn');
+            if (!btn) return;
+            if (isPaused) {
+                btn.innerText = "RESUME";
+                btn.style.borderColor = "var(--danger)";
+                btn.style.color = "var(--danger)";
+            } else {
+                btn.innerText = "PAUSE";
+                btn.style.borderColor = "var(--dim)";
+                btn.style.color = "var(--text)";
+            }
+        }
 
         async function fetchSolPrice() {
             try {
@@ -480,6 +886,55 @@
                 renderKOLAmounts();
             } catch (e) {
                 console.error("Failed to fetch SOL price", e);
+            }
+        }
+
+        async function reconcileExternalLivePositions() {
+            try {
+                let owner = '';
+                if (window.SERVER_CUSTODIAL_MODE === true) {
+                    owner = '';
+                } else if (phantomPublicKey) {
+                    owner = phantomPublicKey;
+                } else {
+                    return;
+                }
+
+                const res = await fetch('/api/live-trading/reconcile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ owner })
+                });
+                const data = await res.json();
+                if (!res.ok) return;
+                if (Array.isArray(data.changes) && data.changes.length > 0) {
+                    log(`Live sync applied: ${data.changes.length} external wallet change(s).`);
+                }
+                await refreshLivePositions();
+            } catch (_e) {
+                // silent background sync
+            }
+        }
+
+        function currentLiveOwner() {
+            if (window.SERVER_CUSTODIAL_MODE === true) return '';
+            if (phantomPublicKey) return phantomPublicKey;
+            return '';
+        }
+
+        async function refreshLivePositions() {
+            try {
+                const owner = currentLiveOwner();
+                let url = '/api/live-trading/open-positions';
+                if (owner) {
+                    url += `?owner=${encodeURIComponent(owner)}`;
+                }
+                const res = await fetch(url);
+                const data = await res.json();
+                if (!res.ok || !Array.isArray(data)) return;
+                updateLivePositions(data);
+            } catch (_e) {
+                // ignore transient fetch errors
             }
         }
 
@@ -512,36 +967,13 @@
             renderKOLAmounts();
         }
 
-        async function connectPhantom() {
-            try {
-                if (!window.solana || !window.solana.isPhantom) {
-                    alert("Phantom wallet not found. Install Phantom extension first.");
-                    return;
-                }
-                const resp = await window.solana.connect();
-                phantomPublicKey = resp.publicKey.toString();
-                const btn = document.getElementById('phantom-connect-btn');
-                if (btn) btn.innerText = `Phantom: ${phantomPublicKey.substring(0, 4)}...${phantomPublicKey.substring(phantomPublicKey.length - 4)}`;
-                log(`Phantom connected: ${phantomPublicKey.substring(0, 8)}...`);
-            } catch (e) {
-                alert(`Failed to connect Phantom: ${e.message || e}`);
-            }
-        }
-
         function toggleLiveTrading() {
             if (window.SERVER_CUSTODIAL_MODE === true) {
-                log("Server custodial mode is active. No Phantom approval needed.");
+                setLiveTradingIndicator(isPaused ? 'PAUSED' : 'ON');
+                log("Server custodial mode is active.");
                 return;
             }
-            if (!phantomPublicKey) {
-                alert("Connect Phantom first.");
-                return;
-            }
-            liveTradingEnabled = !liveTradingEnabled;
-            const btn = document.getElementById('live-trade-btn');
-            if (btn) btn.innerText = `Live Trading: ${liveTradingEnabled ? 'ON' : 'OFF'}`;
-            if (btn) btn.style.color = liveTradingEnabled ? '#00ff9d' : 'var(--text)';
-            log(`Live trading ${liveTradingEnabled ? 'enabled' : 'disabled'}.`);
+            alert("Server wallet mode is required. Use Import Wallet.");
         }
 
         function base64ToUint8Array(base64) {
@@ -610,8 +1042,10 @@
             // Server-custodial mode executes trades autonomously on backend.
             if (window.SERVER_CUSTODIAL_MODE === true) return;
             if (!liveTradingEnabled || !phantomPublicKey) return;
-            if (executedLiveBuys.has(signalId)) return;
+            const tokenBuyKey = `token:${tokenMint}`;
+            if (executedLiveBuys.has(signalId) || executedLiveBuys.has(tokenBuyKey)) return;
             executedLiveBuys.add(signalId);
+            executedLiveBuys.add(tokenBuyKey);
             try {
                 const preBalRes = await fetch(`/api/trading/token-balance?owner=${encodeURIComponent(phantomPublicKey)}&mint=${encodeURIComponent(tokenMint)}`);
                 const preBal = await preBalRes.json();
@@ -643,10 +1077,11 @@
             }
         }
 
-        async function executeLiveSell(tokenMint, reasonTag = '') {
+        async function executeLiveSell(tokenMint, reasonTag = '', force = false) {
             // Server-custodial mode executes trades autonomously on backend.
             if (window.SERVER_CUSTODIAL_MODE === true) return;
-            if (!liveTradingEnabled || !phantomPublicKey) return;
+            if (!phantomPublicKey) return;
+            if (!force && !liveTradingEnabled) return;
             const sellKey = `${tokenMint}:${reasonTag}`;
             if (executedLiveSells.has(sellKey)) return;
             executedLiveSells.add(sellKey);
@@ -672,6 +1107,7 @@
                         tx_sig: sig
                     })
                 });
+                executedLiveBuys.delete(`token:${tokenMint}`);
                 log(`LIVE SELL sent: ${tokenMint.substring(0, 8)}... tx ${sig.substring(0, 10)}... (slippage ${slippage / 100}%)`);
             } catch (e) {
                 log(`LIVE SELL failed: ${e.message || e}`);
@@ -737,14 +1173,103 @@
         }
 
         // --- Settings Logic ---
-        async function toggleSettings() {
-            const panel = document.getElementById('settings-panel');
-            if (panel.style.display === 'block') {
-                panel.style.display = 'none';
-            } else {
-                panel.style.display = 'block';
-                await loadSettings();
+        const MODE_LABELS = {
+            kol_momentum_scalper: 'KOL Momentum Scalper',
+            early_20_scalper: 'Early 20 Scalper',
+            kol_launch_burst_scalper: 'KOL Launch Burst Scalper',
+            chart_pro_breakout_scalper: 'Chart Pro Breakout Scalper'
+        };
+
+        const MODE_CHECKBOX_IDS = {
+            kol_momentum_scalper: 'mode-kol-momentum',
+            early_20_scalper: 'mode-early20',
+            kol_launch_burst_scalper: 'mode-launch-burst',
+            chart_pro_breakout_scalper: 'mode-chart-pro'
+        };
+
+        function getSelectedTradingModes() {
+            const selected = [];
+            for (const [mode, checkboxId] of Object.entries(MODE_CHECKBOX_IDS)) {
+                const el = document.getElementById(checkboxId);
+                if (el && el.checked) selected.push(mode);
             }
+            return selected;
+        }
+
+        function setTradingModesSelection(modes) {
+            const normalized = Array.isArray(modes) && modes.length ? modes : ['kol_momentum_scalper'];
+            for (const [mode, checkboxId] of Object.entries(MODE_CHECKBOX_IDS)) {
+                const el = document.getElementById(checkboxId);
+                if (el) el.checked = normalized.includes(mode);
+            }
+        }
+        function getSettingsFocusableElements() {
+            const panel = document.getElementById('settings-panel');
+            if (!panel) return [];
+            return Array.from(panel.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'))
+                .filter(el => !el.disabled && el.offsetParent !== null);
+        }
+
+        function onSettingsPanelKeydown(event) {
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                toggleSettings(false);
+                return;
+            }
+            if (event.key !== 'Tab') return;
+
+            const focusable = getSettingsFocusableElements();
+            if (!focusable.length) return;
+
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            const active = document.activeElement;
+            if (event.shiftKey && active === first) {
+                event.preventDefault();
+                last.focus();
+            } else if (!event.shiftKey && active === last) {
+                event.preventDefault();
+                first.focus();
+            }
+        }
+
+        let lastFocusedBeforeSettings = null;
+
+        async function toggleSettings(forceOpen) {
+            const panel = document.getElementById('settings-panel');
+            const isOpen = panel.style.display === 'block';
+            const shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : !isOpen;
+            let backdrop = document.getElementById('settings-backdrop');
+
+            panel.setAttribute('role', 'dialog');
+            panel.setAttribute('aria-modal', 'true');
+            panel.setAttribute('aria-label', 'Settings');
+
+            if (!shouldOpen) {
+                panel.style.display = 'none';
+                panel.setAttribute('aria-hidden', 'true');
+                if (backdrop) backdrop.remove();
+                document.removeEventListener('keydown', onSettingsPanelKeydown);
+                if (lastFocusedBeforeSettings && typeof lastFocusedBeforeSettings.focus === 'function') {
+                    lastFocusedBeforeSettings.focus();
+                }
+                return;
+            }
+
+            lastFocusedBeforeSettings = document.activeElement;
+            if (!backdrop) {
+                backdrop = document.createElement('div');
+                backdrop.id = 'settings-backdrop';
+                backdrop.className = 'settings-backdrop';
+                backdrop.addEventListener('click', () => toggleSettings(false));
+                document.body.appendChild(backdrop);
+            }
+            panel.style.display = 'block';
+            panel.setAttribute('aria-hidden', 'false');
+            await loadSettings();
+            document.addEventListener('keydown', onSettingsPanelKeydown);
+            const focusable = getSettingsFocusableElements();
+            if (focusable.length) focusable[0].focus();
         }
 
         async function loadSettings() {
@@ -754,6 +1279,54 @@
 
                 document.getElementById('sol-min').value = settings.sol_amount_min || 0.1;
                 document.getElementById('sol-max').value = settings.sol_amount_max || 0.5;
+                document.getElementById('max-live-open').value = Number(settings.max_live_open_positions ?? 2);
+                document.getElementById('token-cooldown-sec').value = Number(settings.token_cooldown_sec ?? 900);
+                document.getElementById('max-token-age-sec').value = Number(settings.max_token_age_sec ?? 259200);
+                document.getElementById('mcap-kol-min').value = Number(settings.kol_min_mcap_usd ?? 0);
+                document.getElementById('mcap-early20-min').value = Number(settings.early_20_min_mcap_usd ?? 7000);
+                document.getElementById('mcap-launch-burst-min').value = Number(settings.launch_burst_min_mcap_usd ?? 7000);
+                document.getElementById('mcap-chart-pro-min').value = Number(settings.chart_watch_admission_min_mcap_usd ?? settings.chart_pro_min_mcap_usd ?? 20000);
+                document.getElementById('chart-pro-enabled').checked = !!(settings.chart_pro_enabled ?? true);
+                document.getElementById('chart-lookback-bars').value = Number(settings.chart_pro_breakout_lookback_bars ?? 20);
+                document.getElementById('chart-min-vol-multiple').value = Number(settings.chart_pro_min_volume_multiple ?? 1.8);
+                document.getElementById('chart-min-score').value = Number(settings.chart_pro_min_score ?? 42);
+                document.getElementById('chart-min-liquidity-usd').value = Number(settings.chart_watch_admission_min_liquidity_usd ?? settings.chart_pro_min_liquidity_usd ?? 6000);
+                document.getElementById('chart-stop-atr-mult').value = Number(settings.chart_pro_stop_atr_mult ?? 1.2);
+                document.getElementById('chart-tp1-r').value = Number(settings.chart_pro_tp1_r ?? 1.0);
+                document.getElementById('chart-tp2-r').value = Number(settings.chart_pro_tp2_r ?? 2.0);
+                document.getElementById('chart-runner-trail-atr-mult').value = Number(settings.chart_pro_runner_trail_atr_mult ?? 1.5);
+                document.getElementById('chart-max-hold-sec').value = Number(settings.chart_pro_max_hold_sec ?? 360);
+                document.getElementById('chart-cooldown-sec').value = Number(settings.chart_pro_cooldown_sec ?? 900);
+                document.getElementById('chart-watch-max-tokens').value = Number(settings.chart_watch_max_tokens ?? 16);
+                document.getElementById('chart-watch-focus-profile').value = String(settings.chart_watch_focus_profile ?? 'quality_first');
+                document.getElementById('chart-watch-adm-vol').value = Number(settings.chart_watch_admission_min_volume_m5_usd ?? 12000);
+                document.getElementById('chart-watch-adm-age').value = Number(settings.chart_watch_strict_age_sec ?? settings.chart_watch_admission_max_age_sec ?? 86400);
+                document.getElementById('chart-watch-adm-mcap-max').value = Number(settings.chart_watch_admission_max_mcap_usd ?? 100000000);
+                document.getElementById('chart-trend-scan-interval').value = Number(settings.market_trend_scan_interval_sec ?? 20);
+                document.getElementById('chart-trend-max-new').value = Number(settings.market_trend_max_new_per_scan ?? 6);
+                document.getElementById('chart-watch-source-mode').value = String(settings.chart_watch_source_mode ?? 'birdeye_primary');
+                document.getElementById('chart-watch-table-mode').value = String(settings.chart_watch_table_mode ?? 'admitted_only');
+                document.getElementById('chart-watch-backoff-base').value = Number(settings.chart_watch_fail_backoff_base_sec ?? 20);
+                document.getElementById('chart-watch-backoff-max').value = Number(settings.chart_watch_fail_backoff_max_sec ?? 600);
+                document.getElementById('chart-watch-eval-budget').value = Number(settings.chart_watch_eval_budget_per_cycle ?? 8);
+                document.getElementById('chart-watch-startup-burst-enabled').checked = !!(settings.chart_watch_startup_burst_enabled ?? true);
+                document.getElementById('chart-watch-startup-burst-target').value = Number(settings.chart_watch_startup_burst_target ?? 12);
+                document.getElementById('chart-watch-startup-burst-timeout').value = Number(settings.chart_watch_startup_burst_timeout_sec ?? 30);
+                const tableMode = String(settings.chart_watch_table_mode ?? 'admitted_only');
+                let hideFilteredDefault = !!(settings.chart_watch_hide_filtered_in_ui ?? true);
+                if (tableMode === 'admitted_only') hideFilteredDefault = true;
+                if (tableMode === 'all') hideFilteredDefault = false;
+                document.getElementById('chart-watch-hide-filtered').checked = hideFilteredDefault;
+                const hideToggle = document.getElementById('chart-watch-hide-filtered-toggle');
+                if (hideToggle) {
+                    hideToggle.checked = hideFilteredDefault;
+                    delete hideToggle.dataset.userToggled;
+                }
+                document.getElementById('chart-require-retest').checked = !!(settings.chart_pro_require_retest ?? false);
+                const selectedModes = Array.isArray(settings.trading_modes) && settings.trading_modes.length
+                    ? settings.trading_modes
+                    : [settings.trading_mode || 'kol_momentum_scalper'];
+                setTradingModesSelection(selectedModes);
             } catch (e) {
                 console.error("Failed to load settings", e);
             }
@@ -762,6 +1335,42 @@
         async function saveSettings() {
             const solMin = parseFloat(document.getElementById('sol-min').value);
             const solMax = parseFloat(document.getElementById('sol-max').value);
+            const maxLiveOpen = parseInt(document.getElementById('max-live-open').value, 10);
+            const tokenCooldownSec = parseInt(document.getElementById('token-cooldown-sec').value, 10);
+            const maxTokenAgeSec = parseInt(document.getElementById('max-token-age-sec').value, 10);
+            const mcapKolMin = parseFloat(document.getElementById('mcap-kol-min').value);
+            const mcapEarly20Min = parseFloat(document.getElementById('mcap-early20-min').value);
+            const mcapLaunchBurstMin = parseFloat(document.getElementById('mcap-launch-burst-min').value);
+            const mcapChartProMin = parseFloat(document.getElementById('mcap-chart-pro-min').value);
+            const chartProEnabled = !!document.getElementById('chart-pro-enabled').checked;
+            const chartLookbackBars = parseInt(document.getElementById('chart-lookback-bars').value, 10);
+            const chartMinVolMultiple = parseFloat(document.getElementById('chart-min-vol-multiple').value);
+            const chartMinScore = parseFloat(document.getElementById('chart-min-score').value);
+            const chartMinLiquidityUsd = parseFloat(document.getElementById('chart-min-liquidity-usd').value);
+            const chartStopAtrMult = parseFloat(document.getElementById('chart-stop-atr-mult').value);
+            const chartTp1R = parseFloat(document.getElementById('chart-tp1-r').value);
+            const chartTp2R = parseFloat(document.getElementById('chart-tp2-r').value);
+            const chartRunnerTrailAtrMult = parseFloat(document.getElementById('chart-runner-trail-atr-mult').value);
+            const chartMaxHoldSec = parseInt(document.getElementById('chart-max-hold-sec').value, 10);
+            const chartCooldownSec = parseInt(document.getElementById('chart-cooldown-sec').value, 10);
+            const chartWatchMaxTokens = parseInt(document.getElementById('chart-watch-max-tokens').value, 10);
+            const chartWatchFocusProfile = String(document.getElementById('chart-watch-focus-profile').value || 'quality_first');
+            const chartWatchAdmissionVol = parseFloat(document.getElementById('chart-watch-adm-vol').value);
+            const chartWatchAdmissionAge = parseInt(document.getElementById('chart-watch-adm-age').value, 10);
+            const chartWatchAdmissionMcapMax = parseFloat(document.getElementById('chart-watch-adm-mcap-max').value);
+            const chartTrendScanInterval = parseInt(document.getElementById('chart-trend-scan-interval').value, 10);
+            const chartTrendMaxNew = parseInt(document.getElementById('chart-trend-max-new').value, 10);
+            const chartWatchSourceMode = String(document.getElementById('chart-watch-source-mode').value || 'birdeye_primary');
+            const chartWatchTableMode = String(document.getElementById('chart-watch-table-mode').value || 'admitted_only');
+            const chartWatchBackoffBase = parseInt(document.getElementById('chart-watch-backoff-base').value, 10);
+            const chartWatchBackoffMax = parseInt(document.getElementById('chart-watch-backoff-max').value, 10);
+            const chartWatchEvalBudget = parseInt(document.getElementById('chart-watch-eval-budget').value, 10);
+            const chartWatchStartupBurstEnabled = !!document.getElementById('chart-watch-startup-burst-enabled').checked;
+            const chartWatchStartupBurstTarget = parseInt(document.getElementById('chart-watch-startup-burst-target').value, 10);
+            const chartWatchStartupBurstTimeout = parseInt(document.getElementById('chart-watch-startup-burst-timeout').value, 10);
+            let chartWatchHideFiltered = !!document.getElementById('chart-watch-hide-filtered').checked;
+            const chartRequireRetest = !!document.getElementById('chart-require-retest').checked;
+            const tradingModes = getSelectedTradingModes();
 
             if (isNaN(solMin) || isNaN(solMax)) {
                 return alert("Please enter valid numbers");
@@ -774,6 +1383,81 @@
             if (solMin > solMax) {
                 return alert("Min must be less than or equal to Max");
             }
+            if (isNaN(maxLiveOpen) || maxLiveOpen < 0) {
+                return alert("Max live open positions must be 0 or greater");
+            }
+            if (isNaN(tokenCooldownSec) || tokenCooldownSec < 0) {
+                return alert("Token cooldown must be 0 or greater");
+            }
+            if (isNaN(maxTokenAgeSec) || maxTokenAgeSec < 0) {
+                return alert("Max token age must be 0 or greater");
+            }
+            if ([mcapKolMin, mcapEarly20Min, mcapLaunchBurstMin, mcapChartProMin].some(v => isNaN(v) || v < 0)) {
+                return alert("Min market cap values must be 0 or greater");
+            }
+            if ([chartLookbackBars, chartMaxHoldSec, chartCooldownSec].some(v => isNaN(v))) {
+                return alert("Chart settings must be valid numbers");
+            }
+            if (chartLookbackBars < 5 || chartMaxHoldSec < 1 || chartCooldownSec < 0) {
+                return alert("Chart lookback must be >=5, max hold >=1, cooldown >=0");
+            }
+            if (isNaN(chartWatchMaxTokens) || chartWatchMaxTokens < 1 || chartWatchMaxTokens > 250) {
+                return alert("Max monitored tokens must be between 1 and 250");
+            }
+            if (!['quality_first', 'balanced', 'high_frequency'].includes(chartWatchFocusProfile)) {
+                return alert("Invalid chart watch focus profile");
+            }
+            if (isNaN(chartWatchAdmissionVol) || chartWatchAdmissionVol < 0) {
+                return alert("Admission min volume must be 0 or greater");
+            }
+            if (isNaN(chartWatchAdmissionAge) || chartWatchAdmissionAge < 0) {
+                return alert("Admission max age must be 0 or greater");
+            }
+            if (isNaN(chartWatchAdmissionMcapMax) || chartWatchAdmissionMcapMax < 0) {
+                return alert("Admission max market cap must be 0 or greater");
+            }
+            if (chartWatchAdmissionMcapMax > 0 && chartWatchAdmissionMcapMax < mcapChartProMin) {
+                return alert("Admission max market cap must be >= Chart Pro min market cap");
+            }
+            if (!['birdeye_primary', 'public_fallback'].includes(chartWatchSourceMode)) {
+                return alert("Invalid trend source mode");
+            }
+            if (isNaN(chartTrendScanInterval) || chartTrendScanInterval < 10) {
+                return alert("Trend scan interval must be >= 10 seconds");
+            }
+            if (isNaN(chartTrendMaxNew) || chartTrendMaxNew < 1 || chartTrendMaxNew > 25) {
+                return alert("Trend max new per scan must be between 1 and 25");
+            }
+            if (!['admitted_only', 'all'].includes(chartWatchTableMode)) {
+                return alert("Invalid watch table mode");
+            }
+            if (chartWatchTableMode === 'admitted_only') chartWatchHideFiltered = true;
+            if (chartWatchTableMode === 'all') chartWatchHideFiltered = false;
+            if (isNaN(chartWatchBackoffBase) || chartWatchBackoffBase < 1) {
+                return alert("Backoff base must be >= 1");
+            }
+            if (isNaN(chartWatchBackoffMax) || chartWatchBackoffMax < chartWatchBackoffBase) {
+                return alert("Backoff max must be >= backoff base");
+            }
+            if (isNaN(chartWatchEvalBudget) || chartWatchEvalBudget < 1 || chartWatchEvalBudget > 20) {
+                return alert("Eval budget must be between 1 and 20");
+            }
+            if (isNaN(chartWatchStartupBurstTarget) || chartWatchStartupBurstTarget < 1 || chartWatchStartupBurstTarget > 100) {
+                return alert("Startup burst target must be between 1 and 100");
+            }
+            if (isNaN(chartWatchStartupBurstTimeout) || chartWatchStartupBurstTimeout < 5 || chartWatchStartupBurstTimeout > 300) {
+                return alert("Startup burst timeout must be between 5 and 300 seconds");
+            }
+            if (isNaN(chartMinLiquidityUsd) || chartMinLiquidityUsd < 0) {
+                return alert("Chart min liquidity must be 0 or greater");
+            }
+            if ([chartMinVolMultiple, chartMinScore, chartStopAtrMult, chartTp1R, chartTp2R, chartRunnerTrailAtrMult].some(v => isNaN(v) || v <= 0)) {
+                return alert("Chart multipliers/scores must be positive");
+            }
+
+            if (!tradingModes.length) {
+                return alert("Select at least one trading mode");
+            }
 
             try {
                 const res = await fetch('/api/settings', {
@@ -781,13 +1465,57 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         sol_amount_min: solMin,
-                        sol_amount_max: solMax
+                        sol_amount_max: solMax,
+                        trading_modes: tradingModes,
+                        max_live_open_positions: maxLiveOpen,
+                        token_cooldown_sec: tokenCooldownSec,
+                        max_token_age_sec: maxTokenAgeSec,
+                        kol_min_mcap_usd: mcapKolMin,
+                        early_20_min_mcap_usd: mcapEarly20Min,
+                        launch_burst_min_mcap_usd: mcapLaunchBurstMin,
+                        chart_pro_min_mcap_usd: mcapChartProMin,
+                        chart_pro_enabled: chartProEnabled,
+                        chart_pro_entry_tf: '1m',
+                        chart_pro_bias_tf: '5m',
+                        chart_pro_breakout_lookback_bars: chartLookbackBars,
+                        chart_pro_min_volume_multiple: chartMinVolMultiple,
+                        chart_pro_min_score: chartMinScore,
+                        chart_pro_min_liquidity_usd: chartMinLiquidityUsd,
+                        chart_pro_require_retest: chartRequireRetest,
+                        chart_pro_stop_atr_mult: chartStopAtrMult,
+                        chart_pro_tp1_r: chartTp1R,
+                        chart_pro_tp2_r: chartTp2R,
+                        chart_pro_runner_trail_atr_mult: chartRunnerTrailAtrMult,
+                        chart_pro_max_hold_sec: chartMaxHoldSec,
+                        chart_pro_cooldown_sec: chartCooldownSec,
+                        chart_watch_max_tokens: chartWatchMaxTokens,
+                        chart_watch_focus_profile: chartWatchFocusProfile,
+                        chart_watch_admission_min_volume_m5_usd: chartWatchAdmissionVol,
+                        chart_watch_admission_min_mcap_usd: mcapChartProMin,
+                        chart_watch_admission_max_mcap_usd: chartWatchAdmissionMcapMax,
+                        chart_watch_admission_min_liquidity_usd: chartMinLiquidityUsd,
+                        chart_watch_admission_max_age_sec: chartWatchAdmissionAge,
+                        chart_watch_strict_age_sec: chartWatchAdmissionAge,
+                        market_trend_scan_interval_sec: chartTrendScanInterval,
+                        market_trend_max_new_per_scan: chartTrendMaxNew,
+                        chart_watch_fail_backoff_base_sec: chartWatchBackoffBase,
+                        chart_watch_fail_backoff_max_sec: chartWatchBackoffMax,
+                        chart_watch_eval_budget_per_cycle: chartWatchEvalBudget,
+                        chart_watch_startup_burst_enabled: chartWatchStartupBurstEnabled,
+                        chart_watch_startup_burst_target: chartWatchStartupBurstTarget,
+                        chart_watch_startup_burst_timeout_sec: chartWatchStartupBurstTimeout,
+                        chart_watch_source_mode: chartWatchSourceMode,
+                        chart_watch_table_mode: chartWatchTableMode,
+                        chart_watch_hide_filtered_in_ui: chartWatchHideFiltered
                     })
                 });
 
-                const data = await res.json();
+                    const data = await res.json();
                 if (data.status === 'ok') {
-                    log(`✅ Settings updated: ${solMin} - ${solMax} SOL per trade`);
+                    const modeNames = tradingModes.map(m => MODE_LABELS[m] || m).join(', ');
+                    const hideToggle = document.getElementById('chart-watch-hide-filtered-toggle');
+                    if (hideToggle) hideToggle.checked = chartWatchHideFiltered;
+                    log(`Settings updated: ${modeNames} | ${solMin} - ${solMax} SOL | max live ${maxLiveOpen} | cooldown ${tokenCooldownSec}s | max age ${maxTokenAgeSec}s | chart watch max ${chartWatchMaxTokens} | ${chartWatchFocusProfile} | ${chartWatchSourceMode}`);
                     toggleSettings();
                 } else {
                     alert(data.error || "Failed to update settings");
@@ -796,18 +1524,12 @@
                 alert("Error: " + e.message);
             }
         }
-
         function togglePause() {
             isPaused = !isPaused;
-            const btn = document.getElementById('pause-btn');
-            if (isPaused) {
-                btn.innerText = "▶ RESUME";
-                btn.style.borderColor = "var(--danger)";
-                btn.style.color = "var(--danger)";
-            } else {
-                btn.innerText = "⏸ PAUSE";
-                btn.style.borderColor = "var(--dim)";
-                btn.style.color = "var(--text)";
+            localStorage.setItem('dashboardPaused', isPaused ? '1' : '0');
+            renderPauseButtonState();
+            if (window.SERVER_CUSTODIAL_MODE === true) {
+                setLiveTradingIndicator(isPaused ? 'PAUSED' : 'ON');
             }
         }
 
@@ -830,29 +1552,53 @@
                 updatePNL(data.data);
             } else if (data.type === 'live_pnl_update') {
                 updateLivePNL(data.data);
+            } else if (data.type === 'live_positions_update') {
+                if (Array.isArray(data.data)) {
+                    updateLivePositions(data.data);
+                }
+                refreshLivePositions();
             } else if (data.type === 'positions_update') {
                 updatePositions(data.data);
-            } else if (data.type === 'paper_sell_signal') {
-                if (data.data && data.data.token) {
-                    executeLiveSell(data.data.token, data.data.reason || '');
-                }
+            } else if (data.type === 'chart_watch_update') {
+                updateChartWatch(data.data || {});
             }
         };
 
         const amountToggleBtn = document.getElementById('amount-toggle-btn');
         if (amountToggleBtn) amountToggleBtn.innerText = `Amount: ${amountCurrency}`;
+        const hideFilteredToggle = document.getElementById('chart-watch-hide-filtered-toggle');
+        if (hideFilteredToggle) {
+            hideFilteredToggle.addEventListener('change', () => {
+                hideFilteredToggle.dataset.userToggled = '1';
+                if (chartWatchLastData) updateChartWatch(chartWatchLastData);
+            });
+        }
+        renderPauseButtonState();
         fetchSolPrice();
         setInterval(fetchSolPrice, 60000);
+        setInterval(reconcileExternalLivePositions, 30000);
+        setInterval(refreshLivePositions, 5000);
+        setInterval(() => {
+            fetch('/api/chart-watch')
+                .then(r => r.json())
+                .then(updateChartWatch)
+                .catch(() => { });
+        }, 8000);
         fetch('/api/live-trading/stats').then(r => r.json()).then(updateLivePNL).catch(() => { });
+        refreshLivePositions();
+        fetch('/api/chart-watch').then(r => r.json()).then(updateChartWatch).catch(() => { });
         window.SERVER_CUSTODIAL_MODE = false;
+        setLiveTradingIndicator('OFF');
         fetch('/api/trading/custodial-status')
             .then(r => r.json())
             .then(d => {
                 window.SERVER_CUSTODIAL_MODE = !!d.enabled;
                 if (d.enabled) {
                     log(`Server custodial trading enabled (${(d.wallet || '').substring(0, 8)}...)`);
-                    const b = document.getElementById('live-trade-btn');
-                    if (b) b.innerText = 'Live Trading: SERVER';
+                    setLiveTradingIndicator(isPaused ? 'PAUSED' : 'ON');
+                    reconcileExternalLivePositions();
+                } else {
+                    setLiveTradingIndicator('OFF');
                 }
             })
             .catch(() => { });
@@ -864,11 +1610,149 @@
             return "$" + val.toFixed(0);
         }
 
+        function formatElapsed(openedAtSec) {
+            const ts = Number(openedAtSec || 0);
+            if (!ts) return '--';
+            const diff = Math.max(0, Math.floor(Date.now() / 1000 - ts));
+            const h = Math.floor(diff / 3600);
+            const m = Math.floor((diff % 3600) / 60);
+            const s = diff % 60;
+            if (h > 0) return `${h}h ${m}m`;
+            if (m > 0) return `${m}m ${s}s`;
+            return `${s}s`;
+        }
+
+        function formatAge(seconds) {
+            const sec = Math.max(0, Number(seconds || 0));
+            if (!sec) return 'n/a';
+            const d = Math.floor(sec / 86400);
+            const h = Math.floor((sec % 86400) / 3600);
+            const m = Math.floor((sec % 3600) / 60);
+            if (d > 0) return `${d}d ${h}h`;
+            if (h > 0) return `${h}h ${m}m`;
+            return `${m}m`;
+        }
+
+        function axiomTokenUrl(token, pairAddress = '') {
+            const p = String(pairAddress || '').trim();
+            const t = String(token || '').trim();
+            if (p) return `https://axiom.trade/meme/${encodeURIComponent(p)}?chain=sol`;
+            if (t) return `https://axiom.trade/discover?q=${encodeURIComponent(t)}&chain=sol`;
+            return '#';
+        }
+
+        function updateChartWatch(payload) {
+            const data = payload || {};
+            chartWatchLastData = data;
+            const rows = Array.isArray(data.tokens) ? data.tokens : [];
+            const tbody = document.getElementById('chart-watch-body');
+            const summary = document.getElementById('chart-watch-summary');
+            const counters = document.getElementById('chart-watch-counters');
+            const hideToggle = document.getElementById('chart-watch-hide-filtered-toggle');
+            if (!tbody || !summary || !counters) return;
+
+            const maxTokens = Number(data.max_tokens || 0);
+            const activeCount = Number(data.active_count || 0);
+            const visibleCount = Number(data.visible_count || rows.length);
+            const queueDepth = Number(data.queue_depth || 0);
+            const evalsPerMin = Number(data.evals_per_min || 0);
+            const queueLagMsAvg = Number(data.queue_lag_ms_avg || 0);
+            const admitted = Number(data.admitted_count || 0);
+            const suppressed = Number(data.suppressed_count || 0);
+            const rejectedAge = Number(data.rejected_age_count || 0);
+            const rejectedBand = Number(data.rejected_band_count || 0);
+            const rateLimited = Number(data.rate_limited_count || 0);
+            const entryNear = Number(data.entry_near_count || 0);
+            const tableMode = String(data.table_mode || 'admitted_only');
+            const startupBurstActive = !!data.startup_burst_active;
+            const startupBurstAdmitted = Number(data.startup_burst_admitted || 0);
+            const poolRaw = Number(data.candidate_pool_size_raw || 0);
+            const poolPost = Number(data.candidate_pool_size_post_gate || 0);
+            const autopilotEnabled = !!data.autopilot_enabled;
+            const autopilotAction = String(data.autopilot_last_action || 'idle');
+            const autopilotTrades = Number(data.autopilot_window_trades || 0);
+            const autopilotPnl = Number(data.autopilot_window_pnl_sol || 0);
+            const autopilotReason = String(data.autopilot_last_reason || '');
+            const defaultHide = !!data.hide_filtered_default;
+            if (hideToggle && typeof hideToggle.dataset.userToggled === 'undefined') {
+                hideToggle.checked = defaultHide;
+            }
+            const hideFiltered = hideToggle ? !!hideToggle.checked : defaultHide;
+            const sourceMix = (data.source_mix && typeof data.source_mix === 'object') ? data.source_mix : {};
+            const seenMix = (data.source_mix_seen && typeof data.source_mix_seen === 'object')
+                ? data.source_mix_seen
+                : ((sourceMix.seen && typeof sourceMix.seen === 'object') ? sourceMix.seen : {});
+            const admittedMix = (data.source_mix_admitted && typeof data.source_mix_admitted === 'object')
+                ? data.source_mix_admitted
+                : ((sourceMix.admitted && typeof sourceMix.admitted === 'object') ? sourceMix.admitted : {});
+            const seenParts = Object.entries(seenMix).map(([k, v]) => `${k}:${v}`).join(', ');
+            const admittedParts = Object.entries(admittedMix).map(([k, v]) => `${k}:${v}`).join(', ');
+            const mixSummary = admittedParts || seenParts || 'n/a';
+
+            const rowsToShow = hideFiltered
+                ? rows.filter(r => {
+                    const state = String(r && r.state || '').toUpperCase();
+                    return !(r && (r.suppressed === true || state === 'FILTERED' || state === 'WARMING'));
+                })
+                : rows;
+            const shownCount = rowsToShow.length;
+            const burstTag = startupBurstActive ? ` | burst active ${startupBurstAdmitted}` : ` | burst ${startupBurstAdmitted}`;
+            const autoTag = autopilotEnabled ? ` | auto ${autopilotAction}` : ` | auto off`;
+            summary.textContent = `${activeCount} monitored / ${maxTokens} max | ${shownCount} shown (${visibleCount} total) | queue ${queueDepth}${burstTag}`;
+            counters.textContent = `admitted ${admitted} | suppressed ${suppressed} | age rej ${rejectedAge} | mcap rej ${rejectedBand} | rate-limited ${rateLimited} | entry-near ${entryNear} | eval/min ${evalsPerMin} | lag ${queueLagMsAvg}ms | pool ${poolRaw}->${poolPost} | mode ${tableMode} | src ${mixSummary}${autoTag} | wTrades ${autopilotTrades} | wPNL ${autopilotPnl.toFixed(4)} SOL${autopilotReason ? ` | ${autopilotReason}` : ''}`;
+
+            if (!rowsToShow.length) {
+                const msg = (rows.length > 0 && hideFiltered)
+                    ? 'No admitted tokens shown. Uncheck "Hide filtered" to inspect suppressed candidates.'
+                    : 'No monitored tokens';
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--dim); padding:16px;">${msg}</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = '';
+            rowsToShow.forEach(row => {
+                const token = String(row.token || '');
+                const state = String(row.state || 'WATCHING');
+                const stateColor = state === 'IN_POSITION'
+                    ? '#00ff9d'
+                    : (state === 'ENTRY_NEAR' ? '#8be2ff' : (state === 'FILTERED' || state === 'DROPPED' ? '#ff6b8e' : '#ffcf5a'));
+                const source = String(row.source || '').replace('MarketTrend: ', '');
+                const detail = String(row.reason || '');
+                const status = String(row.status || '');
+                const reasonCode = String(row.reason_code || '');
+                const vol = Number(row.volume_m5 || 0);
+                const volFmt = vol > 0 ? `$${Math.round(vol).toLocaleString()}` : '--';
+                const ageFmt = formatAge(Number(row.token_age_sec || 0));
+                const opp = Number(row.opportunity_score || 0);
+                const fail = Number(row.failure_streak || 0);
+                const backoff = Number(row.next_eval_in_sec || 0);
+                const lagMs = Number(row.queue_lag_ms || 0);
+                const pairAddress = String(row.pair_address || '');
+                const tokenLink = token
+                    ? `<a href="${axiomTokenUrl(token, pairAddress)}" target="_blank" style="color:#ffd97f; text-decoration:none;">${token.substring(0, 10)}...</a>`
+                    : '--';
+                const statusTag = row.newer_24h ? `${status} | <24h` : status;
+                const detailTag = `${detail || '--'} | opp ${opp.toFixed(1)} | fail ${fail} | retry ${backoff}s${reasonCode ? ` | ${reasonCode}` : ''}${lagMs > 0 ? ` | lag ${lagMs}ms` : ''}`;
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="padding:6px 4px; border-bottom:1px solid #2f2a19;">${tokenLink}</td>
+                    <td style="padding:6px 4px; border-bottom:1px solid #2f2a19; color:${stateColor};">${state}</td>
+                    <td style="padding:6px 4px; border-bottom:1px solid #2f2a19;">${ageFmt}</td>
+                    <td style="padding:6px 4px; border-bottom:1px solid #2f2a19;">${volFmt}</td>
+                    <td style="padding:6px 4px; border-bottom:1px solid #2f2a19; color:#b8b8b8;">${source || '--'}</td>
+                    <td style="padding:6px 4px; border-bottom:1px solid #2f2a19;">${statusTag || '--'}</td>
+                    <td style="padding:6px 4px; border-bottom:1px solid #2f2a19; color:#8b8b8b;">${detailTag}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
         function updatePositions(positions) {
             const tbody = document.getElementById('trades-body');
 
             if (!positions || positions.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:var(--dim); padding:20px;">No active positions</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; color:var(--dim); padding:20px;">No PAPER ACTIVE POSITIONS</td></tr>';
                 return;
             }
 
@@ -884,14 +1768,12 @@
                 // Format Time
                 const startTime = new Date(pos.start_time * 1000).toLocaleTimeString();
 
-                // Axiom Link - Use pair_address if available, fallback to token search
-                const axiomLink = pos.pair_address ?
-                    `https://axiom.trade/meme/${pos.pair_address}?chain=sol` :
-                    `https://axiom.trade/discover?q=${pos.token}`;
+                // Axiom Link - prefer pair address, fallback token search
+                const axiomLink = axiomTokenUrl(pos.token, pos.pair_address);
 
                 row.innerHTML = `
                     <td>
-                        <a href="${axiomLink}" target="_blank" style="color:var(--accent); text-decoration:none;" title="View on Axiom (Pair: ${pos.pair_address || 'N/A'})">${pos.token.substring(0, 8)}...</a>
+                        <a href="${axiomLink}" target="_blank" style="color:var(--accent); text-decoration:none;" title="View on Axiom">${pos.token.substring(0, 8)}...</a>
                     </td>
                     <td>${pos.entry_sol_amount.toFixed(4)} SOL</td>
                     <td>${formatMCap(pos.entry_fdv)}</td>
@@ -900,6 +1782,7 @@
                     <td class="${pnlClass}">${pnlSign}${pos.pnl_pct.toFixed(2)}%</td>
                     <td title="Held for ${pos.duration_min}m">${startTime}</td>
                     <td><span class="status-badge status-${pos.status}">${pos.status.replace('_', ' ')}</span></td>
+                    <td><button onclick="manualClosePosition('${pos.signature}', '${pos.token}')" style="font-size:0.7rem; border-color:var(--danger); color:var(--danger);">Close</button></td>
                 `;
 
                 tbody.appendChild(row);
@@ -941,8 +1824,7 @@
                     return;
                 }
                 window.SERVER_CUSTODIAL_MODE = !!data.enabled;
-                const b = document.getElementById('live-trade-btn');
-                if (b) b.innerText = data.enabled ? 'Live Trading: SERVER' : 'Live Trading: OFF';
+                setLiveTradingIndicator(data.enabled ? (isPaused ? 'PAUSED' : 'ON') : 'OFF');
                 log(`Custodial key loaded (${(data.wallet || '').substring(0, 8)}...)`);
                 document.getElementById('custodial-private-key').value = '';
                 toggleCustodialKeyModal();
@@ -960,24 +1842,203 @@
                     return;
                 }
                 window.SERVER_CUSTODIAL_MODE = false;
-                const b = document.getElementById('live-trade-btn');
-                if (b) b.innerText = 'Live Trading: OFF';
+                setLiveTradingIndicator('OFF');
                 log('Custodial key cleared; server back to simulation mode.');
             } catch (e) {
                 alert(`Clear failed: ${e.message || e}`);
             }
         }
 
+        async function archiveResetLiveState() {
+            const typed = prompt("Type RESET LIVE to archive and reset live state:");
+            if (typed !== "RESET LIVE") {
+                return;
+            }
+            const resetAnalytics = confirm("Also remove LIVE trades from analytics/history aggregates?");
+            try {
+                const payload = {
+                    confirm_text: "ARCHIVE_RESET_LIVE",
+                    force: false,
+                    reset_live_analytics: !!resetAnalytics,
+                    archive_tag: "dashboard"
+                };
+                let res = await fetch('/api/live-trading/archive-reset', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                let data = await res.json();
+
+                if (res.status === 409) {
+                    const forceOk = confirm(`${data.error || 'Live positions are open.'}\nForce archive/reset anyway?`);
+                    if (!forceOk) return;
+                    payload.force = true;
+                    res = await fetch('/api/live-trading/archive-reset', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    data = await res.json();
+                }
+
+                if (!res.ok || data.error) {
+                    alert(data.error || 'Archive/reset failed');
+                    return;
+                }
+
+                log(`Live archive/reset complete. Archived ${Array.isArray(data.archived_files) ? data.archived_files.length : 0} file(s).`);
+                fetch('/api/live-trading/stats').then(r => r.json()).then(updateLivePNL).catch(() => { });
+                await refreshLivePositions();
+            } catch (e) {
+                alert(`Archive/reset failed: ${e.message || e}`);
+            }
+        }
+
+        async function archiveResetPaperState() {
+            const typed = prompt("Type RESET PAPER to archive and reset paper state:");
+            if (typed !== "RESET PAPER") {
+                return;
+            }
+            const resetAnalytics = confirm("Also remove PAPER trades from analytics/history aggregates?");
+            try {
+                const payload = {
+                    confirm_text: "ARCHIVE_RESET_PAPER",
+                    force: false,
+                    reset_paper_analytics: !!resetAnalytics,
+                    archive_tag: "dashboard"
+                };
+                let res = await fetch('/api/paper-trading/archive-reset', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                let data = await res.json();
+
+                if (res.status === 409) {
+                    const forceOk = confirm(`${data.error || 'Paper positions are open.'}\nForce archive/reset anyway?`);
+                    if (!forceOk) return;
+                    payload.force = true;
+                    res = await fetch('/api/paper-trading/archive-reset', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    data = await res.json();
+                }
+
+                if (!res.ok || data.error) {
+                    alert(data.error || 'Archive/reset failed');
+                    return;
+                }
+
+                log(`Paper archive/reset complete. Archived ${Array.isArray(data.archived_files) ? data.archived_files.length : 0} file(s).`);
+                if (data.after) {
+                    updatePNL(data.after);
+                }
+                updatePositions([]);
+            } catch (e) {
+                alert(`Archive/reset failed: ${e.message || e}`);
+            }
+        }
+
         function updateLivePNL(stats) {
             const pnlEl = document.getElementById('live-pnl-val');
-            const posEl = document.getElementById('live-open-pos');
             const total = Number(stats.total_pnl_sol || 0);
-            const openPos = Number(stats.open_positions || 0);
             if (pnlEl) {
                 pnlEl.innerText = total.toFixed(4) + " SOL";
                 pnlEl.style.color = total >= 0 ? '#00ff9d' : '#ff0055';
             }
-            if (posEl) posEl.innerText = openPos;
+        }
+
+        function updateLivePositions(positions) {
+            const tbody = document.getElementById('live-trades-body');
+            const posEl = document.getElementById('live-open-pos');
+            if (!tbody) return;
+            if (posEl) posEl.innerText = Array.isArray(positions) ? positions.length : 0;
+
+            if (!positions || positions.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; color:var(--dim); padding:20px;">No live positions</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = '';
+            positions.forEach(pos => {
+                const row = document.createElement('tr');
+                const opened = pos.opened_at ? new Date(pos.opened_at * 1000).toLocaleTimeString() : '--';
+                const entryMcap = Number(pos.avg_entry_fdv || 0);
+                const currentMcap = Number(pos.current_fdv || 0);
+                const pnlPct = Number(pos.pnl_pct || 0);
+                const pnlSol = Number(pos.pnl_sol || 0);
+                const pnlUsd = pnlSol * Number(solUsd || 0);
+                const pnlClass = pnlPct >= 0 ? 'pnl-positive' : 'pnl-negative';
+                const pnlSign = pnlPct >= 0 ? '+' : '';
+                const token = String(pos.token || '');
+                const axiomLink = axiomTokenUrl(token, pos.pair_address);
+                row.innerHTML = `
+                    <td style="padding:6px 4px; border-bottom:1px solid #1f2233; color:#9fc0ff;"><a href="${axiomLink}" target="_blank" style="color:#9fc0ff; text-decoration:none;">${token.substring(0, 10)}...</a></td>
+                    <td style="padding:6px 4px; border-bottom:1px solid #1f2233;">${Number(pos.token_amount || 0).toLocaleString(undefined, { maximumFractionDigits: 4 })}</td>
+                    <td style="padding:6px 4px; border-bottom:1px solid #1f2233;">${Number(pos.sol_spent || 0).toFixed(4)} SOL</td>
+                    <td style="padding:6px 4px; border-bottom:1px solid #1f2233;">${entryMcap > 0 ? formatMCap(entryMcap) : '--'}</td>
+                    <td style="padding:6px 4px; border-bottom:1px solid #1f2233;">${currentMcap > 0 ? formatMCap(currentMcap) : '--'}</td>
+                    <td class="${pnlClass}" style="padding:6px 4px; border-bottom:1px solid #1f2233;">${pnlSign}$${Math.abs(pnlUsd).toFixed(2)}</td>
+                    <td class="${pnlClass}" style="padding:6px 4px; border-bottom:1px solid #1f2233;">${pnlSign}${pnlPct.toFixed(2)}%</td>
+                    <td style="padding:6px 4px; border-bottom:1px solid #1f2233;">${opened}</td>
+                    <td style="padding:6px 4px; border-bottom:1px solid #1f2233;">${formatElapsed(pos.opened_at)}</td>
+                    <td style="padding:6px 4px; border-bottom:1px solid #1f2233;"><button onclick="closeLivePosition('${token}')" style="font-size:0.7rem; border-color:var(--danger); color:var(--danger);">Close</button></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        async function closeLivePosition(token) {
+            const ok = confirm(`Close LIVE position ${token.substring(0, 8)}... now?`);
+            if (!ok) return;
+            try {
+                if (window.SERVER_CUSTODIAL_MODE === true) {
+                    const res = await fetch('/api/live-trading/close', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ token, reason: 'MANUAL_CLOSE' })
+                    });
+                    const data = await res.json();
+                    if (!res.ok || data.error) {
+                        alert(data.error || 'Failed to close live position');
+                        return;
+                    }
+                    log(`Server live close submitted: ${token.substring(0, 8)}...`);
+                    await refreshLivePositions();
+                    return;
+                }
+                await executeLiveSell(token, 'MANUAL_CLOSE', true);
+                await refreshLivePositions();
+            } catch (e) {
+                alert(`Live close failed: ${e.message || e}`);
+            }
+        }
+
+        async function manualClosePosition(signature, token) {
+            const ok = confirm(`Close position ${token.substring(0, 8)}... now?`);
+            if (!ok) return;
+            try {
+                const res = await fetch('/api/positions/close', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        signature,
+                        token,
+                        reason: 'MANUAL_CLOSE'
+                    })
+                });
+                const data = await res.json();
+                if (!res.ok || data.error) {
+                    const detail = data.error || data.detail || 'Failed to close position';
+                    alert(detail);
+                    return;
+                }
+                log(`Manual close submitted: ${token.substring(0, 8)}...`);
+            } catch (e) {
+                alert(`Manual close failed: ${e.message || e}`);
+            }
         }
 
         function log(msg) {
@@ -1079,10 +2140,22 @@
 
                 if (data.status === 'BUY_SIGNAL') {
                     badgeClass = 'safe';
-                    displayStatus = 'BUY';
+                    displayStatus = 'BUY SIGNAL';
                     if (data.token) {
                         executeLiveBuy(data.token, data.signature || data.token);
                     }
+                } else if (data.status === 'ADD_ON') {
+                    badgeClass = 'safe';
+                    displayStatus = 'ADD-ON';
+                } else if (data.status === 'PAPER_OPENED') {
+                    badgeClass = 'safe';
+                    displayStatus = 'OPENED';
+                } else if (data.status === 'SKIPPED') {
+                    badgeClass = 'risk';
+                    displayStatus = 'SKIPPED';
+                } else if (data.status === 'EXECUTION_ERROR') {
+                    badgeClass = 'risk';
+                    displayStatus = 'EXEC ERROR';
                 } else if (data.status === 'SAFE') {
                     badgeClass = 'safe';
                 } else if (data.status === 'SUPER_ALPHA') {
@@ -1143,6 +2216,7 @@
     </script>
 
 </html>
+
 
 
 

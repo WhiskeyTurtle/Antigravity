@@ -1,0 +1,283 @@
+[2026-02-12 00:52:34] Hourly optimizer tick started
+[2026-02-12 00:52:34] Failed applying settings: The remote server returned an error: (422) Unprocessable Entity.
+[2026-02-12 00:52:34] Autopilot last_run age=65s action=hold
+[2026-02-12 00:52:34] Restart required; cycling server
+[2026-02-12 00:52:37] Launched start_guarded.bat
+[2026-02-12 00:52:49] Server healthy after restart
+[2026-02-12 00:52:49] Hourly optimizer tick finished
+[2026-02-12 00:53:37] Hourly optimizer tick started
+[2026-02-12 00:53:38] Failed applying settings: The remote server returned an error: (422) Unprocessable Entity.
+[2026-02-12 00:53:38] Autopilot last_run age=9s action=hold
+[2026-02-12 00:53:38] No restart needed; server healthy
+[2026-02-12 00:53:38] Hourly optimizer tick finished
+[2026-02-12 00:53:54] Hourly optimizer tick started
+[2026-02-12 00:53:54] Failed applying settings: The remote server returned an error: (422) Unprocessable Entity.
+[2026-02-12 00:53:54] Autopilot last_run age=25s action=hold
+[2026-02-12 00:53:54] No restart needed; server healthy
+[2026-02-12 00:53:54] Hourly optimizer tick finished
+[2026-02-12 00:54:41] Hourly optimizer tick started
+[2026-02-12 00:54:41] Failed applying settings: The remote server returned an error: (422) Unprocessable Entity.
+[2026-02-12 00:54:41] Autopilot last_run age=72s action=hold
+[2026-02-12 00:54:41] No restart needed; server healthy
+[2026-02-12 00:54:41] Hourly optimizer tick finished
+[2026-02-12 00:55:18] Hourly optimizer tick started
+[2026-02-12 00:55:18] Health check failed at start
+[2026-02-12 00:55:18] Restart required; cycling server
+[2026-02-12 00:55:20] Launched start_guarded.bat
+[2026-02-12 00:55:32] Server still unhealthy after restart
+[2026-02-12 00:55:32] Hourly optimizer tick finished
+[2026-02-12 00:56:01] Hourly optimizer tick started
+[2026-02-12 00:56:01] Health check failed at start
+[2026-02-12 00:56:01] Restart required; cycling server
+[2026-02-12 00:56:04] Launched start_guarded.bat
+[2026-02-12 00:56:16] Server still unhealthy after restart
+[2026-02-12 00:56:16] Hourly optimizer tick finished
+[2026-02-12 00:56:55] Hourly optimizer tick started
+[2026-02-12 00:57:01] Health check failed at start
+[2026-02-12 00:57:01] Restart required; cycling server
+[2026-02-12 00:57:03] Launched start_guarded.bat
+[2026-02-12 00:57:27] Server still unhealthy after restart
+[2026-02-12 00:57:27] Hourly optimizer tick finished
+[2026-02-12 00:58:34] Hourly optimizer tick started
+[2026-02-12 00:58:40] Health check failed at start
+[2026-02-12 00:58:40] Restart required; cycling server
+[2026-02-12 00:58:43] Launched start_guarded.bat
+[2026-02-12 00:59:07] Server still unhealthy after restart
+[2026-02-12 00:59:07] Hourly optimizer tick finished
+[2026-02-12 00:59:53] Hourly optimizer tick started
+[2026-02-12 00:59:53] Failed applying settings: HTTP 422: {"detail":[{"type":"missing","loc":["body","sol_amount_min"],"msg":"Field required","input":{"autopilot_window_sec":3600,"autopilot_enabled":true,"autopilot_no_trade_window_sec":3600,"autopilot_interval_sec":3600}},{"type":"missing","loc":["body","sol_amount_max"],"msg":"Field required","input":{"autopilot_window_sec":3600,"autopilot_enabled":true,"autopilot_no_trade_window_sec":3600,"autopilot_interval_sec":3600}}]}
+[2026-02-12 00:59:53] Autopilot last_run age=22s action=hold
+[2026-02-12 00:59:53] No restart needed; server healthy
+[2026-02-12 00:59:53] Hourly optimizer tick finished
+[2026-02-12 01:00:18] Hourly optimizer tick started
+[2026-02-12 01:00:19] Applied autopilot hourly settings
+[2026-02-12 01:00:19] Autopilot last_run age=48s action=hold
+[2026-02-12 01:00:19] No restart needed; server healthy
+[2026-02-12 01:00:19] Hourly optimizer tick finished
+[2026-02-12 01:00:38] Hourly optimizer tick started
+[2026-02-12 01:00:38] Applied autopilot hourly settings
+[2026-02-12 01:00:38] Autopilot last_run age=67s action=hold
+[2026-02-12 01:00:38] No restart needed; server healthy
+[2026-02-12 01:00:38] Hourly optimizer tick finished
+[2026-02-12 01:52:01] Hourly optimizer tick started
+[2026-02-12 01:52:01] Applied autopilot hourly settings
+[2026-02-12 01:52:01] Autopilot last_run age=3030s action=hold
+[2026-02-12 01:52:01] No restart needed; server healthy
+[2026-02-12 01:52:01] Hourly optimizer tick finished
+[2026-02-12 02:52:01] Hourly optimizer tick started
+[2026-02-12 02:52:01] Applied autopilot hourly settings
+[2026-02-12 02:52:01] Autopilot last_run age=3027s action=hold
+[2026-02-12 02:52:01] No restart needed; server healthy
+[2026-02-12 02:52:01] Hourly optimizer tick finished
+[2026-02-12 03:52:01] Hourly optimizer tick started
+[2026-02-12 03:52:01] Applied autopilot hourly settings
+[2026-02-12 03:52:01] Autopilot last_run age=3017s action=hold
+[2026-02-12 03:52:01] No restart needed; server healthy
+[2026-02-12 03:52:01] Hourly optimizer tick finished
+[2026-02-12 04:52:01] Hourly optimizer tick started
+[2026-02-12 04:52:02] Applied autopilot hourly settings
+[2026-02-12 04:52:02] Autopilot last_run age=3018s action=hold
+[2026-02-12 04:52:02] No restart needed; server healthy
+[2026-02-12 04:52:02] Hourly optimizer tick finished
+[2026-02-12 05:52:01] Hourly optimizer tick started
+[2026-02-12 05:52:01] Applied autopilot hourly settings
+[2026-02-12 05:52:01] Autopilot last_run age=3017s action=hold
+[2026-02-12 05:52:01] No restart needed; server healthy
+[2026-02-12 05:52:01] Hourly optimizer tick finished
+[2026-02-12 06:52:01] Hourly optimizer tick started
+[2026-02-12 06:52:37] Health check failed at start
+[2026-02-12 06:52:37] Restart required; cycling server
+[2026-02-12 06:52:40] Launched start_guarded.bat
+[2026-02-12 06:52:43] Server healthy after restart
+[2026-02-12 06:52:43] Hourly optimizer tick finished
+[2026-02-12 07:52:01] Hourly optimizer tick started
+[2026-02-12 07:52:01] Applied autopilot hourly settings
+[2026-02-12 07:52:01] Autopilot last_run age=2991s action=hold
+[2026-02-12 07:52:01] No restart needed; server healthy
+[2026-02-12 07:52:01] Hourly optimizer tick finished
+[2026-02-12 08:52:02] Hourly optimizer tick started
+[2026-02-12 08:52:38] Health check failed at start
+[2026-02-12 08:52:38] Restart required; cycling server
+[2026-02-12 08:52:41] Launched start_guarded.bat
+[2026-02-12 08:53:00] Server healthy after restart
+[2026-02-12 08:53:00] Hourly optimizer tick finished
+[2026-02-12 09:26:36] Hourly optimizer tick started
+[2026-02-12 09:27:13] Health check failed at start
+[2026-02-12 09:27:13] Restart required; cycling server
+[2026-02-12 09:27:15] Launched start_guarded.bat
+[2026-02-12 09:28:19] Server healthy after restart
+[2026-02-12 09:28:19] Hourly optimizer tick finished
+[2026-02-12 09:28:42] Hourly optimizer tick started
+[2026-02-12 09:28:42] Applied autopilot hourly settings
+[2026-02-12 09:28:43] AI optimizer: {"status": "skipped", "reason": "OPENAI_API_KEY missing"}
+[2026-02-12 09:28:43] Autopilot last_run age=1593s action=hold
+[2026-02-12 09:28:43] No restart needed; server healthy
+[2026-02-12 09:28:43] Hourly optimizer tick finished
+[2026-02-12 09:52:04] Hourly optimizer tick started
+[2026-02-12 09:52:40] Health check failed at start
+[2026-02-12 09:52:40] Restart required; cycling server
+[2026-02-12 09:52:43] Launched start_guarded.bat
+[2026-02-12 09:53:47] Server healthy after restart
+[2026-02-12 09:53:47] Hourly optimizer tick finished
+[2026-02-12 09:55:28] Hourly optimizer tick started
+[2026-02-12 09:56:05] Health check failed at start
+[2026-02-12 09:56:05] Restart required; cycling server
+[2026-02-12 09:56:07] Launched start_guarded.bat
+[2026-02-12 09:57:32] Server healthy after restart
+[2026-02-12 09:57:32] Hourly optimizer tick finished
+[2026-02-12 10:10:27] Hourly optimizer tick started
+[2026-02-12 10:11:03] Health check failed at start
+[2026-02-12 10:11:03] Restart required; cycling server
+[2026-02-12 10:11:05] Launched start_guarded.bat
+[2026-02-12 10:12:30] Server healthy after restart
+[2026-02-12 10:12:30] Hourly optimizer tick finished
+[2026-02-12 10:52:04] Hourly optimizer tick started
+[2026-02-12 10:52:27] Applied autopilot hourly settings
+[2026-02-12 10:52:41] AI optimizer: {"status": "error", "reason": "settings_http_error: {\"error\":\"chart_watch_focus_profile must be quality_first, balanced, or high_frequency\"}", "updates": {}, "systemic_updates": {"chart_watch_focus_profile": "volatility_first", "chart_watch_trend_min_volume_m5_usd": 2640.0, "chart_watch_trend_min_liquidity_usd": 3444.0, "chart_watch_trend_min_mcap_usd": 9600.0, "chart_pro_min_score": 18.0, "market_trend_scan_interval_sec": 5, "market_trend_max_new_per_scan": 16, "chart_watch_eval_budget_per_cycle": 22, "chart_watch_eval_concurrency": 4}}
+[2026-02-12 10:52:41] Autopilot last_run age=3031s action=hold
+[2026-02-12 10:52:41] No restart needed; server healthy
+[2026-02-12 10:52:41] Hourly optimizer tick finished
+[2026-02-12 11:52:01] Hourly optimizer tick started
+[2026-02-12 11:52:01] Failed applying settings: HTTP 500: Internal Server Error
+[2026-02-12 11:52:03] AI optimizer: {"status": "hold", "source": "heuristic_fallback", "current_profile": "high_frequency", "target_profile": "high_frequency", "systemic_applied": false, "systemic_skipped_reason": "", "updates": {}, "systemic_updates": {}, "rationale": "openai_http_error: {\n    \"error\": {\n        \"message\": \"The model `gpt-5.3-codex-high` does not exist or you do not have access to it.\",\n        \"type\": \"invalid_request_error\",\n        \"param\": null,\n        \"code\": \"model_not_found\"\n    ", "reason": "no updates required"}
+[2026-02-12 11:52:03] Autopilot last_run age=1542s action=hold
+[2026-02-12 11:52:03] No restart needed; server healthy
+[2026-02-12 11:52:03] Hourly optimizer tick finished
+[2026-02-12 12:52:01] Hourly optimizer tick started
+[2026-02-12 12:52:37] Health check failed at start
+[2026-02-12 12:52:37] Restart required; cycling server
+[2026-02-12 12:52:40] Launched start_guarded.bat
+[2026-02-12 12:53:08] Server healthy after restart
+[2026-02-12 12:53:08] Hourly optimizer tick finished
+[2026-02-12 13:52:01] Hourly optimizer tick started
+[2026-02-12 13:52:01] Failed applying settings: HTTP 500: Internal Server Error
+[2026-02-12 13:52:03] AI optimizer: {"status": "error", "reason": "settings_http_error: {\"error\":\"chart_watch_eval_budget_per_cycle must be between 1 and 20\"}", "updates": {}, "systemic_updates": {"chart_watch_focus_profile": "volatility_first", "chart_watch_trend_min_volume_m5_usd": 2640.0, "chart_watch_trend_min_liquidity_usd": 3444.0, "chart_watch_trend_min_mcap_usd": 9600.0, "chart_pro_min_score": 18.0, "market_trend_scan_interval_sec": 5, "market_trend_max_new_per_scan": 16, "chart_watch_eval_budget_per_cycle": 22, "chart_watch_eval_concurrency": 4}}
+[2026-02-12 13:52:03] Autopilot last_run age=1499s action=relax_admission
+[2026-02-12 13:52:03] No restart needed; server healthy
+[2026-02-12 13:52:03] Hourly optimizer tick finished
+[2026-02-12 14:52:01] Hourly optimizer tick started
+[2026-02-12 14:52:01] Failed applying settings: HTTP 500: Internal Server Error
+[2026-02-12 14:52:02] AI optimizer: {"status": "hold", "source": "heuristic_fallback", "current_profile": "volatility_first", "target_profile": "volatility_first", "systemic_applied": false, "systemic_skipped_reason": "", "updates": {}, "systemic_updates": {}, "rationale": "openai_http_error: {\n    \"error\": {\n        \"message\": \"The model `gpt-5.3-codex-high` does not exist or you do not have access to it.\",\n        \"type\": \"invalid_request_error\",\n        \"param\": null,\n        \"code\": \"model_not_found\"\n    ", "reason": "no updates required"}
+[2026-02-12 14:52:02] Autopilot last_run age=1498s action=relax_admission
+[2026-02-12 14:52:02] No restart needed; server healthy
+[2026-02-12 14:52:02] Hourly optimizer tick finished
+[2026-02-12 15:52:01] Hourly optimizer tick started
+[2026-02-12 15:52:38] Health check failed at start
+[2026-02-12 15:52:38] Restart required; cycling server
+[2026-02-12 15:52:40] Launched start_guarded.bat
+[2026-02-12 15:53:16] Server healthy after restart
+[2026-02-12 15:53:16] Hourly optimizer tick finished
+[2026-02-12 16:52:01] Hourly optimizer tick started
+[2026-02-12 16:52:01] Applied autopilot hourly settings
+[2026-02-12 16:52:02] AI optimizer: {"status": "applied", "source": "heuristic_fallback", "current_profile": "high_frequency", "target_profile": "quality_first", "systemic_applied": true, "systemic_skipped_reason": "", "updates": {}, "systemic_updates": {"chart_watch_focus_profile": "quality_first", "chart_watch_trend_min_volume_m5_usd": 2500.0, "chart_watch_trend_min_liquidity_usd": 3500.0, "chart_watch_trend_min_mcap_usd": 12000.0, "chart_pro_min_score": 30.0, "market_trend_scan_interval_sec": 11, "market_trend_max_new_per_scan": 13, "chart_watch_eval_budget_per_cycle": 20, "chart_watch_eval_concurrency": 4}, "rationale": "openai_http_error: {\n    \"error\": {\n        \"message\": \"The model `gpt-5.3-codex-high` does not exist or you do not have access to it.\",\n        \"type\": \"invalid_request_error\",\n        \"param\": null,\n        \"code\": \"model_not_found\"\n    "}
+[2026-02-12 16:52:02] Autopilot last_run age=411s action=hold
+[2026-02-12 16:52:02] No restart needed; server healthy
+[2026-02-12 16:52:02] Hourly optimizer tick finished
+[2026-02-12 17:52:01] Hourly optimizer tick started
+[2026-02-12 17:52:02] Applied autopilot hourly settings
+[2026-02-12 17:52:03] AI optimizer: {"status": "hold", "source": "heuristic_fallback", "current_profile": "quality_first", "target_profile": "high_frequency", "systemic_applied": false, "systemic_skipped_reason": "profile switch blocked by dwell (3600s < 10800s)", "updates": {}, "systemic_updates": {}, "rationale": "openai_http_error: {\n    \"error\": {\n        \"message\": \"The model `gpt-5.3-codex-high` does not exist or you do not have access to it.\",\n        \"type\": \"invalid_request_error\",\n        \"param\": null,\n        \"code\": \"model_not_found\"\n    ", "reason": "no updates required"}
+[2026-02-12 17:52:03] Autopilot last_run age=530s action=hold
+[2026-02-12 17:52:03] No restart needed; server healthy
+[2026-02-12 17:52:03] Hourly optimizer tick finished
+[2026-02-12 18:52:02] Hourly optimizer tick started
+[2026-02-12 18:52:02] Applied autopilot hourly settings
+[2026-02-12 18:52:03] AI optimizer: {"status": "hold", "source": "heuristic_fallback", "current_profile": "quality_first", "target_profile": "high_frequency", "systemic_applied": false, "systemic_skipped_reason": "profile switch blocked by dwell (7200s < 10800s)", "updates": {}, "systemic_updates": {}, "rationale": "openai_http_error: {\n    \"error\": {\n        \"message\": \"The model `gpt-5.3-codex-high` does not exist or you do not have access to it.\",\n        \"type\": \"invalid_request_error\",\n        \"param\": null,\n        \"code\": \"model_not_found\"\n    ", "reason": "no updates required"}
+[2026-02-12 18:52:03] Autopilot last_run age=530s action=hold
+[2026-02-12 18:52:03] No restart needed; server healthy
+[2026-02-12 18:52:03] Hourly optimizer tick finished
+[2026-02-12 19:52:01] Hourly optimizer tick started
+[2026-02-12 19:52:01] Applied autopilot hourly settings
+[2026-02-12 19:52:04] AI optimizer: {"status": "hold", "source": "heuristic_fallback", "current_profile": "quality_first", "target_profile": "high_frequency", "systemic_applied": false, "systemic_skipped_reason": "profile switch blocked by dwell (10799s < 10800s)", "updates": {}, "systemic_updates": {}, "rationale": "openai_http_error: {\n    \"error\": {\n        \"message\": \"The model `gpt-5.3-codex-high` does not exist or you do not have access to it.\",\n        \"type\": \"invalid_request_error\",\n        \"param\": null,\n        \"code\": \"model_not_found\"\n    ", "reason": "no updates required"}
+[2026-02-12 19:52:04] Autopilot last_run age=3121s action=hold
+[2026-02-12 19:52:04] No restart needed; server healthy
+[2026-02-12 19:52:04] Hourly optimizer tick finished
+[2026-02-12 20:52:01] Hourly optimizer tick started
+[2026-02-12 20:52:01] Applied autopilot hourly settings
+[2026-02-12 20:52:02] AI optimizer: {"status": "hold", "source": "heuristic_fallback", "current_profile": "quality_first", "target_profile": "quality_first", "systemic_applied": false, "systemic_skipped_reason": "", "updates": {}, "systemic_updates": {}, "rationale": "openai_http_error: {\n    \"error\": {\n        \"message\": \"The model `gpt-5.3-codex-high` does not exist or you do not have access to it.\",\n        \"type\": \"invalid_request_error\",\n        \"param\": null,\n        \"code\": \"model_not_found\"\n    ", "reason": "no updates required"}
+[2026-02-12 20:52:02] Autopilot last_run age=3119s action=hold
+[2026-02-12 20:52:02] No restart needed; server healthy
+[2026-02-12 20:52:02] Hourly optimizer tick finished
+[2026-02-12 21:52:01] Hourly optimizer tick started
+[2026-02-12 21:52:01] Applied autopilot hourly settings
+[2026-02-12 21:52:03] AI optimizer: {"status": "error", "reason": "settings_http_error: {\"error\":\"chart_watch_eval_budget_per_cycle must be between 1 and 20\"}", "updates": {}, "systemic_updates": {"chart_watch_focus_profile": "high_frequency", "chart_watch_trend_min_volume_m5_usd": 2125.0, "chart_watch_trend_min_liquidity_usd": 2800.0, "chart_watch_trend_min_mcap_usd": 9360.0, "chart_pro_min_score": 26.0, "market_trend_scan_interval_sec": 10, "market_trend_max_new_per_scan": 15, "chart_watch_eval_budget_per_cycle": 22, "chart_watch_eval_concurrency": 5}}
+[2026-02-12 21:52:03] Autopilot last_run age=3120s action=hold
+[2026-02-12 21:52:03] No restart needed; server healthy
+[2026-02-12 21:52:03] Hourly optimizer tick finished
+[2026-02-12 22:52:01] Hourly optimizer tick started
+[2026-02-12 22:52:01] Applied autopilot hourly settings
+[2026-02-12 22:52:02] AI optimizer: {"status": "applied", "source": "heuristic_fallback", "current_profile": "high_frequency", "target_profile": "quality_first", "systemic_applied": true, "systemic_skipped_reason": "", "updates": {}, "systemic_updates": {"chart_watch_focus_profile": "quality_first", "chart_watch_trend_min_volume_m5_usd": 2500.0, "chart_watch_trend_min_liquidity_usd": 3500.0, "chart_watch_trend_min_mcap_usd": 12000.0, "chart_pro_min_score": 30.0, "market_trend_scan_interval_sec": 12, "market_trend_max_new_per_scan": 12, "chart_watch_eval_budget_per_cycle": 20, "chart_watch_eval_concurrency": 4}, "rationale": "openai_http_error: {\n    \"error\": {\n        \"message\": \"The model `gpt-5.3-codex-high` does not exist or you do not have access to it.\",\n        \"type\": \"invalid_request_error\",\n        \"param\": null,\n        \"code\": \"model_not_found\"\n    "}
+[2026-02-12 22:52:02] Autopilot last_run age=3119s action=hold
+[2026-02-12 22:52:02] No restart needed; server healthy
+[2026-02-12 22:52:02] Hourly optimizer tick finished
+[2026-02-12 23:52:01] Hourly optimizer tick started
+[2026-02-12 23:52:02] Applied autopilot hourly settings
+[2026-02-12 23:52:03] AI optimizer: {"status": "hold", "source": "heuristic_fallback", "current_profile": "quality_first", "target_profile": "high_frequency", "systemic_applied": false, "systemic_skipped_reason": "profile switch blocked by dwell (3600s < 10800s)", "updates": {}, "systemic_updates": {}, "rationale": "openai_http_error: {\n    \"error\": {\n        \"message\": \"The model `gpt-5.3-codex-high` does not exist or you do not have access to it.\",\n        \"type\": \"invalid_request_error\",\n        \"param\": null,\n        \"code\": \"model_not_found\"\n    ", "reason": "no updates required"}
+[2026-02-12 23:52:03] Autopilot last_run age=3120s action=hold
+[2026-02-12 23:52:03] No restart needed; server healthy
+[2026-02-12 23:52:03] Hourly optimizer tick finished
+[2026-02-13 00:52:01] Hourly optimizer tick started
+[2026-02-13 00:52:01] Applied autopilot hourly settings
+[2026-02-13 00:52:03] AI optimizer: {"status": "hold", "source": "heuristic_fallback", "current_profile": "quality_first", "target_profile": "high_frequency", "systemic_applied": false, "systemic_skipped_reason": "profile switch blocked by dwell (7200s < 10800s)", "updates": {}, "systemic_updates": {}, "rationale": "openai_http_error: {\n    \"error\": {\n        \"message\": \"The model `gpt-5.3-codex-high` does not exist or you do not have access to it.\",\n        \"type\": \"invalid_request_error\",\n        \"param\": null,\n        \"code\": \"model_not_found\"\n    ", "reason": "no updates required"}
+[2026-02-13 00:52:03] Autopilot last_run age=3120s action=hold
+[2026-02-13 00:52:03] No restart needed; server healthy
+[2026-02-13 00:52:03] Hourly optimizer tick finished
+[2026-02-13 01:52:01] Hourly optimizer tick started
+[2026-02-13 01:52:02] Applied autopilot hourly settings
+[2026-02-13 01:52:04] AI optimizer: {"status": "error", "reason": "settings_http_error: {\"error\":\"chart_watch_eval_budget_per_cycle must be between 1 and 20\"}", "updates": {}, "systemic_updates": {"chart_watch_focus_profile": "high_frequency", "chart_watch_trend_min_volume_m5_usd": 2125.0, "chart_watch_trend_min_liquidity_usd": 2800.0, "chart_watch_trend_min_mcap_usd": 9360.0, "chart_pro_min_score": 26.0, "market_trend_scan_interval_sec": 11, "market_trend_max_new_per_scan": 14, "chart_watch_eval_budget_per_cycle": 22, "chart_watch_eval_concurrency": 5}}
+[2026-02-13 01:52:04] Autopilot last_run age=3121s action=hold
+[2026-02-13 01:52:04] No restart needed; server healthy
+[2026-02-13 01:52:04] Hourly optimizer tick finished
+[2026-02-13 02:52:01] Hourly optimizer tick started
+[2026-02-13 02:52:01] Applied autopilot hourly settings
+[2026-02-13 02:52:02] AI optimizer: {"status": "applied", "source": "heuristic_fallback", "current_profile": "high_frequency", "target_profile": "quality_first", "systemic_applied": true, "systemic_skipped_reason": "", "updates": {}, "systemic_updates": {"chart_watch_focus_profile": "quality_first", "chart_watch_trend_min_volume_m5_usd": 2500.0, "chart_watch_trend_min_liquidity_usd": 3500.0, "chart_watch_trend_min_mcap_usd": 12000.0, "chart_pro_min_score": 30.0, "market_trend_scan_interval_sec": 13, "market_trend_max_new_per_scan": 11, "chart_watch_eval_budget_per_cycle": 20, "chart_watch_eval_concurrency": 4}, "rationale": "openai_http_error: {\n    \"error\": {\n        \"message\": \"The model `gpt-5.3-codex-high` does not exist or you do not have access to it.\",\n        \"type\": \"invalid_request_error\",\n        \"param\": null,\n        \"code\": \"model_not_found\"\n    "}
+[2026-02-13 02:52:02] Autopilot last_run age=3119s action=hold
+[2026-02-13 02:52:02] No restart needed; server healthy
+[2026-02-13 02:52:02] Hourly optimizer tick finished
+[2026-02-13 03:52:01] Hourly optimizer tick started
+[2026-02-13 03:52:02] Applied autopilot hourly settings
+[2026-02-13 03:52:03] AI optimizer: {"status": "hold", "source": "heuristic_fallback", "current_profile": "quality_first", "target_profile": "volatility_first", "systemic_applied": false, "systemic_skipped_reason": "profile switch blocked by dwell (3600s < 10800s)", "updates": {}, "systemic_updates": {}, "rationale": "openai_http_error: {\n    \"error\": {\n        \"message\": \"The model `gpt-5.3-codex-high` does not exist or you do not have access to it.\",\n        \"type\": \"invalid_request_error\",\n        \"param\": null,\n        \"code\": \"model_not_found\"\n    ", "reason": "no updates required"}
+[2026-02-13 03:52:03] Autopilot last_run age=3120s action=hold
+[2026-02-13 03:52:03] No restart needed; server healthy
+[2026-02-13 03:52:03] Hourly optimizer tick finished
+[2026-02-13 04:52:01] Hourly optimizer tick started
+[2026-02-13 04:52:01] Applied autopilot hourly settings
+[2026-02-13 04:52:03] AI optimizer: {"status": "hold", "source": "heuristic_fallback", "current_profile": "quality_first", "target_profile": "high_frequency", "systemic_applied": false, "systemic_skipped_reason": "profile switch blocked by dwell (7200s < 10800s)", "updates": {}, "systemic_updates": {}, "rationale": "openai_http_error: {\n    \"error\": {\n        \"message\": \"The model `gpt-5.3-codex-high` does not exist or you do not have access to it.\",\n        \"type\": \"invalid_request_error\",\n        \"param\": null,\n        \"code\": \"model_not_found\"\n    ", "reason": "no updates required"}
+[2026-02-13 04:52:03] Autopilot last_run age=3120s action=hold
+[2026-02-13 04:52:03] No restart needed; server healthy
+[2026-02-13 04:52:03] Hourly optimizer tick finished
+[2026-02-13 05:52:01] Hourly optimizer tick started
+[2026-02-13 05:52:02] Applied autopilot hourly settings
+[2026-02-13 05:52:03] AI optimizer: {"status": "error", "reason": "settings_http_error: {\"error\":\"chart_watch_eval_budget_per_cycle must be between 1 and 20\"}", "updates": {}, "systemic_updates": {"chart_watch_focus_profile": "high_frequency", "chart_watch_trend_min_volume_m5_usd": 2125.0, "chart_watch_trend_min_liquidity_usd": 2800.0, "chart_watch_trend_min_mcap_usd": 9360.0, "chart_pro_min_score": 26.0, "market_trend_scan_interval_sec": 12, "market_trend_max_new_per_scan": 13, "chart_watch_eval_budget_per_cycle": 22, "chart_watch_eval_concurrency": 5}}
+[2026-02-13 05:52:03] Autopilot last_run age=3120s action=rollback_risk
+[2026-02-13 05:52:03] No restart needed; server healthy
+[2026-02-13 05:52:03] Hourly optimizer tick finished
+[2026-02-13 06:52:01] Hourly optimizer tick started
+[2026-02-13 06:52:02] Applied autopilot hourly settings
+[2026-02-13 06:52:02] AI optimizer: {"status": "hold", "source": "heuristic_fallback", "current_profile": "high_frequency", "target_profile": "high_frequency", "systemic_applied": false, "systemic_skipped_reason": "", "updates": {}, "systemic_updates": {}, "rationale": "openai_http_error: {\n    \"error\": {\n        \"message\": \"The model `gpt-5.3-codex-high` does not exist or you do not have access to it.\",\n        \"type\": \"invalid_request_error\",\n        \"param\": null,\n        \"code\": \"model_not_found\"\n    ", "reason": "no updates required"}
+[2026-02-13 06:52:02] Autopilot last_run age=3119s action=hold
+[2026-02-13 06:52:02] No restart needed; server healthy
+[2026-02-13 06:52:02] Hourly optimizer tick finished
+[2026-02-13 07:52:02] Hourly optimizer tick started
+[2026-02-13 07:52:02] Applied autopilot hourly settings
+[2026-02-13 07:52:02] AI optimizer: {"status": "hold", "source": "heuristic_fallback", "current_profile": "high_frequency", "target_profile": "high_frequency", "systemic_applied": false, "systemic_skipped_reason": "", "updates": {}, "systemic_updates": {}, "rationale": "openai_http_error: {\n    \"error\": {\n        \"message\": \"The model `gpt-5.3-codex-high` does not exist or you do not have access to it.\",\n        \"type\": \"invalid_request_error\",\n        \"param\": null,\n        \"code\": \"model_not_found\"\n    ", "reason": "no updates required"}
+[2026-02-13 07:52:03] Autopilot last_run age=3120s action=hold
+[2026-02-13 07:52:03] No restart needed; server healthy
+[2026-02-13 07:52:03] Hourly optimizer tick finished
+[2026-02-13 08:52:02] Hourly optimizer tick started
+[2026-02-13 08:52:02] Applied autopilot hourly settings
+[2026-02-13 08:52:03] AI optimizer: {"status": "hold", "source": "heuristic_fallback", "current_profile": "high_frequency", "target_profile": "high_frequency", "systemic_applied": false, "systemic_skipped_reason": "", "updates": {}, "systemic_updates": {}, "rationale": "openai_http_error: {\n    \"error\": {\n        \"message\": \"The model `gpt-5.3-codex-high` does not exist or you do not have access to it.\",\n        \"type\": \"invalid_request_error\",\n        \"param\": null,\n        \"code\": \"model_not_found\"\n    ", "reason": "no updates required"}
+[2026-02-13 08:52:03] Autopilot last_run age=3120s action=hold
+[2026-02-13 08:52:03] No restart needed; server healthy
+[2026-02-13 08:52:03] Hourly optimizer tick finished
+[2026-02-13 09:52:01] Hourly optimizer tick started
+[2026-02-13 09:52:02] Applied autopilot hourly settings
+[2026-02-13 09:52:03] AI optimizer: {"status": "applied", "source": "heuristic_fallback", "current_profile": "high_frequency", "target_profile": "quality_first", "systemic_applied": true, "systemic_skipped_reason": "", "updates": {}, "systemic_updates": {"chart_watch_focus_profile": "quality_first", "chart_watch_trend_min_volume_m5_usd": 2500.0, "chart_watch_trend_min_liquidity_usd": 3500.0, "chart_watch_trend_min_mcap_usd": 12000.0, "chart_pro_min_score": 30.0, "market_trend_scan_interval_sec": 14, "market_trend_max_new_per_scan": 10, "chart_watch_eval_budget_per_cycle": 20, "chart_watch_eval_concurrency": 4}, "rationale": "openai_http_error: {\n    \"error\": {\n        \"message\": \"The model `gpt-5.3-codex-high` does not exist or you do not have access to it.\",\n        \"type\": \"invalid_request_error\",\n        \"param\": null,\n        \"code\": \"model_not_found\"\n    "}
+[2026-02-13 09:52:03] Autopilot last_run age=3120s action=hold
+[2026-02-13 09:52:03] No restart needed; server healthy
+[2026-02-13 09:52:03] Hourly optimizer tick finished
+[2026-02-13 10:52:01] Hourly optimizer tick started
+[2026-02-13 10:52:02] Applied autopilot hourly settings
+[2026-02-13 10:52:02] AI optimizer: {"status": "hold", "source": "heuristic_fallback", "current_profile": "quality_first", "target_profile": "high_frequency", "systemic_applied": false, "systemic_skipped_reason": "profile switch blocked by dwell (3600s < 10800s)", "updates": {}, "systemic_updates": {}, "rationale": "openai_http_error: {\n    \"error\": {\n        \"message\": \"The model `gpt-5.3-codex-high` does not exist or you do not have access to it.\",\n        \"type\": \"invalid_request_error\",\n        \"param\": null,\n        \"code\": \"model_not_found\"\n    ", "reason": "no updates required"}
+[2026-02-13 10:52:02] Autopilot last_run age=3119s action=hold
+[2026-02-13 10:52:02] No restart needed; server healthy
+[2026-02-13 10:52:02] Hourly optimizer tick finished

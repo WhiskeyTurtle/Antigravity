@@ -41,14 +41,21 @@ class TradeAnalyticsStore:
         with open(self.analytics_file, "w", encoding="utf-8") as f:
             json.dump(self._data, f, indent=2)
 
-    def record_trade_analytics(self, closed_trade: dict):
+    def record_trade_analytics(self, closed_trade: dict, autosave: bool = True) -> bool:
         token = closed_trade.get("token", "")
         close_time = float(closed_trade.get("close_time", 0) or 0)
+        trade_type = str(closed_trade.get("trade_type", "PAPER") or "PAPER")
         for t in self._data["trades"]:
-            if t.get("token") == token and float(t.get("close_time", 0) or 0) == close_time:
-                return
+            if (
+                t.get("token") == token
+                and str(t.get("trade_type", "PAPER") or "PAPER") == trade_type
+                and float(t.get("close_time", 0) or 0) == close_time
+            ):
+                return False
 
         trade = {
+            "trade_type": trade_type,
+            "strategy_mode": closed_trade.get("strategy_mode", ""),
             "token": token,
             "entry_price": closed_trade.get("entry_price", 0.0),
             "exit_price": closed_trade.get("sell_price", 0.0),
@@ -70,22 +77,61 @@ class TradeAnalyticsStore:
         }
 
         self._data["trades"].append(trade)
-        self._save()
+        if autosave:
+            self._save()
+        return True
 
-    def update_trade_post_close_ath(self, token: str, close_time: float, ath_post_close_72h: dict) -> bool:
+    def record_trade_analytics_many(self, closed_trades: List[dict]) -> int:
+        """Bulk ingest trades and save once to avoid repeated full-file rewrites."""
+        added = 0
+        for trade in list(closed_trades or []):
+            try:
+                if self.record_trade_analytics(trade, autosave=False):
+                    added += 1
+            except Exception:
+                continue
+        if added > 0:
+            self._save()
+        return added
+
+    def update_trade_post_close_ath(
+        self,
+        token: str,
+        close_time: float,
+        ath_post_close_72h: dict,
+        autosave: bool = True,
+    ) -> bool:
         for trade in self._data["trades"]:
             if trade.get("token") == token and float(trade.get("close_time", 0)) == float(close_time):
                 trade["ath_post_close_72h"] = ath_post_close_72h
-                self._save()
+                if autosave:
+                    self._save()
                 return True
         return False
+
+    def save(self):
+        self._save()
 
     def get_trades(self) -> List[dict]:
         return self._data.get("trades", [])
 
+    def purge_trade_type(self, trade_type: str) -> int:
+        ttype = str(trade_type or "").strip().upper()
+        if not ttype:
+            return 0
+        trades = list(self._data.get("trades", []))
+        kept = [t for t in trades if str(t.get("trade_type", "PAPER") or "PAPER").strip().upper() != ttype]
+        removed = len(trades) - len(kept)
+        if removed > 0:
+            self._data["trades"] = kept
+            self._save()
+        return removed
+
     def export_analytics_csv(self, output_file: str = CSV_EXPORT_FILE) -> str:
         trades = self.get_trades()
         fieldnames = [
+            "trade_type",
+            "strategy_mode",
             "token",
             "entry_price",
             "exit_price",
@@ -118,6 +164,8 @@ class TradeAnalyticsStore:
                 writer.writerow(
                     {
                         "token": t.get("token", ""),
+                        "trade_type": t.get("trade_type", "PAPER"),
+                        "strategy_mode": t.get("strategy_mode", ""),
                         "entry_price": t.get("entry_price", 0.0),
                         "exit_price": t.get("exit_price", 0.0),
                         "pnl": t.get("pnl", 0.0),

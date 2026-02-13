@@ -71,6 +71,11 @@ def _run_bird_guarded(cmd_args, env, timeout):
             return None
 
 
+async def _run_bird_guarded_async(cmd_args, env, timeout):
+    """Run Bird CLI in a worker thread so async loops stay responsive."""
+    return await asyncio.to_thread(_run_bird_guarded, cmd_args, env, timeout)
+
+
 class MockTwitterStream:
     def __init__(self, callback):
         self.callback = callback
@@ -146,7 +151,7 @@ class BirdTwitterStream:
             logger.error("bird CLI not found. Install with: npm install -g @steipete/bird")
             return
 
-        result = _run_bird_guarded([BIRD_CMD, "whoami"], env=env, timeout=10)
+        result = await _run_bird_guarded_async([BIRD_CMD, "whoami"], env=env, timeout=10)
         if result is None or result.returncode != 0:
             logger.warning("Bird auth failed/unavailable. Falling back to mock stream.")
             mock = MockTwitterStream(self.callback)
@@ -164,7 +169,7 @@ class BirdTwitterStream:
 
     async def _poll_influencer(self, influencer):
         handle = influencer["handle"]
-        result = _run_bird_guarded(
+        result = await _run_bird_guarded_async(
             [BIRD_CMD, "user-tweets", handle, "-n", "5", "--json"],
             env=self._bird_env(),
             timeout=30,
@@ -254,7 +259,7 @@ class SocialMonitor:
             if not handle:
                 continue
 
-            result = _run_bird_guarded(
+            result = await _run_bird_guarded_async(
                 [BIRD_CMD, "user-tweets", handle, "-n", "15", "--json"],
                 env=self._bird_env(),
                 timeout=25,
@@ -295,7 +300,7 @@ class SocialMonitor:
             self._creator_cache[handle] = out
             return out
 
-        result = _run_bird_guarded(
+        result = await _run_bird_guarded_async(
             [BIRD_CMD, "user", handle, "--json"],
             env=self._bird_env(),
             timeout=20,

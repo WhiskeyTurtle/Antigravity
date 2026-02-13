@@ -103,6 +103,16 @@
             background: #333;
             color: #ccc;
         }
+
+        .type-paper {
+            background: #184f34;
+            color: #b9ffd9;
+        }
+
+        .type-live {
+            background: #1a2e63;
+            color: #b7d1ff;
+        }
     </style>
 </head>
 
@@ -118,11 +128,14 @@
         <table id="history-table">
             <thead>
                 <tr>
+                    <th>TYPE</th>
                     <th>TOKEN</th>
+                    <th>STRATEGY</th>
                     <th>RESULT</th>
                     <th>PNL (SOL)</th>
                     <th>PNL %</th>
                     <th>ENTRY SOL</th>
+                    <th>ENTRY TIME</th>
                     <th>ENTRY PRICE</th>
                     <th>EXIT PRICE</th>
                     <th>DURATION</th>
@@ -131,7 +144,7 @@
             </thead>
             <tbody id="history-body">
                 <tr>
-                    <td colspan="9" style="text-align:center; padding:20px;">Loading history...</td>
+                    <td colspan="12" style="text-align:center; padding:20px;">Loading history...</td>
                 </tr>
             </tbody>
         </table>
@@ -140,6 +153,8 @@
     <div id="stats-footer"
         style="margin-top:20px; border-top:1px solid var(--dim); padding-top:10px; display:flex; gap:20px; font-size:0.9rem;">
         <div>Total Trades: <span id="total-trades" style="color:#fff">0</span></div>
+        <div>Paper: <span id="paper-trades" style="color:#b9ffd9">0</span></div>
+        <div>Live: <span id="live-trades" style="color:#b7d1ff">0</span></div>
         <div>Win Rate: <span id="win-rate" style="color:var(--accent)">0%</span></div>
         <div>Total PnL: <span id="total-pnl" style="color:#fff">0.00 SOL</span></div>
     </div>
@@ -153,9 +168,37 @@
                 const history = await res.json();
                 renderTable(history);
             } catch (e) {
-                document.getElementById('history-body').innerHTML = '<tr><td colspan="9" style="color:var(--danger); text-align:center;">Failed to load history</td></tr>';
+                document.getElementById('history-body').innerHTML = '<tr><td colspan="12" style="color:var(--danger); text-align:center;">Failed to load history</td></tr>';
                 console.error(e);
             }
+        }
+
+        function formatStrategyMode(modeRaw) {
+            const mode = String(modeRaw || '').trim().toLowerCase();
+            if (mode === 'kol_momentum_scalper') return 'KOL Momentum';
+            if (mode === 'early_20_scalper') return 'Early 20';
+            if (mode === 'kol_launch_burst_scalper') return 'Launch Burst';
+            if (!mode) return 'Unknown';
+            return mode.replaceAll('_', ' ');
+        }
+
+        function normalizeEpochSeconds(rawValue) {
+            if (rawValue === undefined || rawValue === null || rawValue === '') return 0;
+            const asNumber = Number(rawValue);
+            if (Number.isFinite(asNumber) && asNumber > 0) {
+                return asNumber > 1e12 ? asNumber / 1000 : asNumber;
+            }
+            if (typeof rawValue === 'string') {
+                const parsedMs = Date.parse(rawValue);
+                if (Number.isFinite(parsedMs) && parsedMs > 0) return parsedMs / 1000;
+            }
+            return 0;
+        }
+
+        function formatDateTime(epochSecRaw) {
+            const epochSec = normalizeEpochSeconds(epochSecRaw);
+            if (!Number.isFinite(epochSec) || epochSec <= 0) return '--';
+            return new Date(epochSec * 1000).toLocaleString();
         }
 
         function renderTable(trades) {
@@ -163,18 +206,22 @@
             tbody.innerHTML = '';
 
             if (!trades || trades.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:20px; color:var(--dim);">No completed trades recorded.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="12" style="text-align:center; padding:20px; color:var(--dim);">No completed trades recorded.</td></tr>';
                 return;
             }
 
-            // Reverse to show newest first
-            const sortedTrades = [...trades].reverse();
+            const sortedTrades = [...trades];
 
             let wins = 0;
             let totalPnL = 0;
+            let paperCount = 0;
+            let liveCount = 0;
 
             sortedTrades.forEach(trade => {
                 const row = document.createElement('tr');
+                const type = String(trade.trade_type || 'PAPER').toUpperCase();
+                if (type === 'LIVE') liveCount++;
+                else paperCount++;
 
                 const isWin = trade.pnl >= 0;
                 if (isWin) wins++;
@@ -186,23 +233,39 @@
                 // Fallbacks for missing fields in old data
                 const pnlPct = trade.pnl_pct !== undefined ? trade.pnl_pct : 0;
                 const entrySol = trade.entry_sol_amount || 0;
-
-                const durationMin = (trade.duration / 60).toFixed(1) + 'm';
+                const durationSec = Number(trade.duration || 0);
+                const durationMin = durationSec > 0 ? (durationSec / 60).toFixed(1) + 'm' : '--';
+                const entryPrice = Number(trade.entry_price || 0);
+                const exitPrice = Number(trade.exit_price || trade.sell_price || 0);
+                const closeTimeSec = normalizeEpochSeconds(trade.close_time ?? trade.closed_at);
+                const explicitEntryTimeSec = normalizeEpochSeconds(
+                    trade.entry_time ?? trade.opened_at ?? trade.start_time ?? trade.timestamp
+                );
+                const entryTimeSec = explicitEntryTimeSec > 0
+                    ? explicitEntryTimeSec
+                    : (closeTimeSec > 0
+                        ? (durationSec > 0 ? Math.max(0, closeTimeSec - durationSec) : closeTimeSec)
+                        : 0);
+                const entryTimeLabel = formatDateTime(entryTimeSec);
+                const strategyLabel = formatStrategyMode(trade.strategy_mode);
 
                 const axiomLink = trade.pair_address ?
                     `https://axiom.trade/meme/${trade.pair_address}?chain=sol` :
                     `https://axiom.trade/discover?q=${trade.token}`;
 
                 row.innerHTML = `
+                    <td><span class="badge ${type === 'LIVE' ? 'type-live' : 'type-paper'}">${type}</span></td>
                     <td>
                         <a href="${axiomLink}" target="_blank" title="${trade.token}">${trade.token.substring(0, 8)}...</a>
                     </td>
+                    <td><span class="badge">${strategyLabel}</span></td>
                     <td class="${pnlClass}">${isWin ? 'WIN' : 'LOSS'}</td>
                     <td class="${pnlClass}">${sign}${trade.pnl.toFixed(4)}</td>
                     <td class="${pnlClass}">${sign}${pnlPct.toFixed(2)}%</td>
                     <td>${entrySol.toFixed(4)}</td>
-                    <td>${(trade.entry_price || 0).toFixed(9)}</td> 
-                    <td>${trade.sell_price.toFixed(9)}</td>
+                    <td>${entryTimeLabel}</td>
+                    <td>${entryPrice > 0 ? entryPrice.toFixed(9) : '--'}</td> 
+                    <td>${exitPrice > 0 ? exitPrice.toFixed(9) : '--'}</td>
                     <td>${durationMin}</td>
                     <td><span class="badge" style="background:${trade.reason === 'TAKE_PROFIT' ? '#004400' : '#440000'}">${trade.reason}</span></td>
                 `;
@@ -211,6 +274,8 @@
 
             // Update Stats
             document.getElementById('total-trades').innerText = trades.length;
+            document.getElementById('paper-trades').innerText = paperCount;
+            document.getElementById('live-trades').innerText = liveCount;
             const winRate = trades.length > 0 ? (wins / trades.length * 100).toFixed(1) : 0;
             document.getElementById('win-rate').innerText = winRate + '%';
 

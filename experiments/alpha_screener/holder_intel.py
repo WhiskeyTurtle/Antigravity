@@ -1,6 +1,7 @@
 import asyncio
 import aiohttp
 import time
+import statistics
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Set
 
@@ -18,6 +19,8 @@ class HolderIntel:
     def __init__(self, rpc_url: str):
         self.rpc_url = rpc_url
         self.gecko_base = "https://api.geckoterminal.com/api/v2"
+        self.wallet_age_sample_size = 12
+        self.wallet_age_signature_limit = 200
 
     async def _rpc_call(self, method: str, params: list):
         payload = {
@@ -68,6 +71,45 @@ class HolderIntel:
             except Exception:
                 continue
         return (total / total_supply) * 100.0
+
+    async def _get_top_holder_wallets(self, token_mint: str, limit: int = 20) -> List[str]:
+        result = await self._rpc_call("getTokenLargestAccounts", [token_mint])
+        if not result:
+            return []
+        token_accounts = []
+        for a in (result.get("value", []) or []):
+            addr = str(a.get("address", "") or "").strip()
+            if addr:
+                token_accounts.append(addr)
+            if len(token_accounts) >= max(1, int(limit)):
+                break
+        if not token_accounts:
+            return []
+
+        multi = await self._rpc_call(
+            "getMultipleAccounts",
+            [
+                token_accounts,
+                {"encoding": "jsonParsed"},
+            ],
+        )
+        wallets: List[str] = []
+        seen: Set[str] = set()
+        values = ((multi or {}).get("value", []) if isinstance(multi, dict) else []) or []
+        for row in values:
+            try:
+                owner = str(
+                    (((row or {}).get("data", {}) or {}).get("parsed", {}) or {})
+                    .get("info", {})
+                    .get("owner", "")
+                    or ""
+                ).strip()
+                if owner and owner not in seen:
+                    wallets.append(owner)
+                    seen.add(owner)
+            except Exception:
+                continue
+        return wallets
 
     async def _get_pool_data(self, token_mint: str) -> Optional[dict]:
         url = f"{self.gecko_base}/networks/solana/tokens/{token_mint}/pools"
@@ -185,6 +227,84 @@ class HolderIntel:
                 continue
         return total
 
+    async def _wallet_first_seen_ts(self, wallet: str, sig_limit: int = 200) -> float:
+        result = await self._rpc_call(
+            "getSignaturesForAddress",
+            [
+                wallet,
+                {"limit": max(1, int(sig_limit))},
+            ],
+        )
+        if not isinstance(result, list) or not result:
+            return 0.0
+        oldest = 0.0
+        for row in result:
+            try:
+                ts = float((row or {}).get("blockTime", 0) or 0)
+            except Exception:
+                ts = 0.0
+            if ts <= 0:
+                continue
+            oldest = ts if oldest <= 0 else min(oldest, ts)
+        return oldest
+
+    async def _wallet_age_cluster_metrics(self, wallets: List[str]) -> dict:
+        sampled = [str(w or "").strip() for w in (wallets or []) if str(w or "").strip()]
+        sampled = sampled[: max(1, int(self.wallet_age_sample_size))]
+        if not sampled:
+            return {
+                "sample_size": 0,
+                "ages_hours": [],
+                "recent_24h_share_pct": 0.0,
+                "recent_48h_share_pct": 0.0,
+                "same_hour_cluster_pct": 0.0,
+                "median_age_hours": 0.0,
+            }
+
+        first_seen_rows = await asyncio.gather(
+            *[self._wallet_first_seen_ts(w, sig_limit=self.wallet_age_signature_limit) for w in sampled],
+            return_exceptions=True,
+        )
+        now = time.time()
+        first_seen_ts: List[float] = []
+        for ts in first_seen_rows:
+            if isinstance(ts, Exception):
+                continue
+            tsv = float(ts or 0.0)
+            if tsv > 0:
+                first_seen_ts.append(tsv)
+
+        if not first_seen_ts:
+            return {
+                "sample_size": 0,
+                "ages_hours": [],
+                "recent_24h_share_pct": 0.0,
+                "recent_48h_share_pct": 0.0,
+                "same_hour_cluster_pct": 0.0,
+                "median_age_hours": 0.0,
+            }
+
+        ages_hours = [max(0.0, (now - ts) / 3600.0) for ts in first_seen_ts]
+        sample_size = len(ages_hours)
+        recent_24h = sum(1 for h in ages_hours if h <= 24.0)
+        recent_48h = sum(1 for h in ages_hours if h <= 48.0)
+
+        hour_buckets: Dict[int, int] = {}
+        for ts in first_seen_ts:
+            bucket = int(ts // 3600)
+            hour_buckets[bucket] = int(hour_buckets.get(bucket, 0) or 0) + 1
+        same_hour_cluster = (max(hour_buckets.values()) / sample_size * 100.0) if hour_buckets else 0.0
+        median_age = float(statistics.median(ages_hours)) if ages_hours else 0.0
+
+        return {
+            "sample_size": sample_size,
+            "ages_hours": [round(h, 2) for h in ages_hours],
+            "recent_24h_share_pct": round(recent_24h / sample_size * 100.0, 2),
+            "recent_48h_share_pct": round(recent_48h / sample_size * 100.0, 2),
+            "same_hour_cluster_pct": round(same_hour_cluster, 2),
+            "median_age_hours": round(median_age, 2),
+        }
+
     async def _group_holding_pct(self, wallets: Set[str], token_mint: str, total_supply: float) -> float:
         if total_supply <= 0 or not wallets:
             return 0.0
@@ -234,6 +354,13 @@ class HolderIntel:
             snipers_pct = await self._group_holding_pct(snipers, token_mint, total_supply)
             bundlers_pct = await self._group_holding_pct(bundlers, token_mint, total_supply)
 
+        wallet_age = {"sample_size": 0, "ages_hours": [], "recent_24h_share_pct": 0.0, "recent_48h_share_pct": 0.0, "same_hour_cluster_pct": 0.0, "median_age_hours": 0.0}
+        try:
+            top_wallets = await self._get_top_holder_wallets(token_mint, limit=max(12, self.wallet_age_sample_size))
+            wallet_age = await self._wallet_age_cluster_metrics(top_wallets)
+        except Exception:
+            pass
+
         return {
             "top10_holding_pct": round(top10_pct, 2),
             "snipers_holding_pct": round(snipers_pct, 2),
@@ -241,6 +368,12 @@ class HolderIntel:
             "sniper_wallet_count": sniper_wallets,
             "bundler_wallet_count": bundler_wallets,
             "total_supply": total_supply,
+            "wallet_age_sample_size": int(wallet_age.get("sample_size", 0) or 0),
+            "wallet_age_hours_sample": list(wallet_age.get("ages_hours", []) or []),
+            "wallet_age_recent_24h_share_pct": float(wallet_age.get("recent_24h_share_pct", 0.0) or 0.0),
+            "wallet_age_recent_48h_share_pct": float(wallet_age.get("recent_48h_share_pct", 0.0) or 0.0),
+            "wallet_age_same_hour_cluster_pct": float(wallet_age.get("same_hour_cluster_pct", 0.0) or 0.0),
+            "wallet_age_median_hours": float(wallet_age.get("median_age_hours", 0.0) or 0.0),
             "source": "geckoterminal+rpc_heuristic",
             "calculated_at": time.time(),
             "latency_sec": round(time.time() - started_at, 3),
